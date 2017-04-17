@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,6 +34,26 @@ public class MouseApp extends Activity
         connect=new Connect(instanceDomain);
     }
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.quit:
+			return true;
+		case R.id.reset:
+			resetClient();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+
     private void resetClient() {
         connect.registerApp(new NextAction() {
             public void run(String res) {
@@ -52,6 +74,8 @@ public class MouseApp extends Activity
         });
     }
 
+    public void quit(View v) {
+    }
     public void resetApp(View v) {
         resetClient();
     }
@@ -68,10 +92,16 @@ public class MouseApp extends Activity
         }
     }
 
+    public void userok(View v) {
+	    UserInput.userok(v);
+    }
+    public void userko(View v) {
+	    UserInput.userko(v);
+    }
     void askPwd() {
-        UserInput.show(new NextAction() {
+        UserInput.show(this, new NextAction() {
             public void run(String res) {
-                String[] ss = res.split();
+                String[] ss = res.split(" ");
                 if (ss.length==2) {
                     useremail=ss[0];
                     userpwd=ss[1];

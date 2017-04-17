@@ -2,16 +2,21 @@ package fr.xtof54.mousetodon;
 
 import android.content.DialogInterface; 
 import android.app.Dialog; 
+import android.view.View;
+import android.widget.TextView;
+import android.app.Activity;
 
-
-public class UserInput extends Dialog {
-    public static void show(final NextAction next) {
-        final Dialog dialog = new Dialog(getActivity());
+public class UserInput {
+	static Dialog dialog;
+	static NextAction next;
+    public static void show(Activity main, final NextAction next) {
+	    UserInput.next=next;
+        dialog = new Dialog(main);
         dialog.setContentView(R.layout.userinput);
         dialog.setTitle("Enter user creds");
-        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
+        dialog.show();
+    }
+    public static void userok(View v) {
                             TextView txt = (TextView)dialog.findViewById(R.id.login);
                             String u = txt.getText().toString(); 
                             txt = (TextView)dialog.findViewById(R.id.pwd);
@@ -19,13 +24,8 @@ public class UserInput extends Dialog {
                             dialog.cancel();
                             next.run(u+" "+p);
                         }
-                    })
-                    .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
+    public static void userko(View v) {
                             dialog.cancel();
                             next.run("");
                         }
-                    });
-        dialog.show();
-    }
 }

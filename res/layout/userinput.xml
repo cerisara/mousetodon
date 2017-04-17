@@ -22,5 +22,18 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="16dp"
         android:hint="password"/>
-</LinearLayout>
 
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="OK"
+    android:onClick="userok"
+    />
+
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Cancel"
+    android:onClick="userko"
+    />
+</LinearLayout>
