@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 public class MouseApp extends Activity
 {
-
+    public static MouseApp main=null;
     String instanceDomain = "octodon.social";
     Connect connect;
 
@@ -29,6 +29,7 @@ public class MouseApp extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        MouseApp.main=this;
         setContentView(R.layout.main);
         pref = getSharedPreferences("MouseApp", MODE_PRIVATE);
         connect=new Connect(instanceDomain);
@@ -99,17 +100,22 @@ public class MouseApp extends Activity
 	    UserInput.userko(v);
     }
     void askPwd() {
-        UserInput.show(this, new NextAction() {
-            public void run(String res) {
-                String[] ss = res.split(" ");
-                if (ss.length==2) {
-                    useremail=ss[0];
-                    userpwd=ss[1];
-                    SharedPreferences.Editor edit = pref.edit();
-                    edit.putString(String.format("user_for_%s", instanceDomain), useremail);
-                    edit.putString(String.format("pswd_for_%s", instanceDomain), userpwd);
-                    edit.commit();
-                }
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+                UserInput.show(main, new NextAction() {
+                    public void run(String res) {
+                        String[] ss = res.split(" ");
+                        if (ss.length==2) {
+                            useremail=ss[0];
+                            userpwd=ss[1];
+                            SharedPreferences.Editor edit = pref.edit();
+                            edit.putString(String.format("user_for_%s", instanceDomain), useremail);
+                            edit.putString(String.format("pswd_for_%s", instanceDomain), userpwd);
+                            edit.commit();
+                        }
+                    }
+                });
             }
         });
     }
