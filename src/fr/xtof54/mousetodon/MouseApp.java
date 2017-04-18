@@ -9,10 +9,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
+import java.io.File;
+import java.util.ArrayList;
+import java.io.PrintWriter;
+import java.io.FileWriter;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Toast;
 
 public class MouseApp extends Activity
 {
     public static MouseApp main=null;
+    public static String access_token=null;
+    public static String tmpfiledir=null;
+
+    ArrayList<String> toots = new ArrayList<String>();
+
     String instanceDomain = "octodon.social";
     Connect connect;
 
@@ -23,6 +36,7 @@ public class MouseApp extends Activity
 
     SharedPreferences pref;
     private static String OAUTH_SCOPES = "read";
+    CustomList adapter=null;
 
     /** Called when the activity is first created. */
     @Override
@@ -33,6 +47,26 @@ public class MouseApp extends Activity
         setContentView(R.layout.main);
         pref = getSharedPreferences("MouseApp", MODE_PRIVATE);
         connect=new Connect(instanceDomain);
+
+        adapter = new CustomList(MouseApp.main, toots);
+        ListView list=(ListView)findViewById(R.id.list);
+        list.setAdapter(adapter);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Toast.makeText(MouseApp.this, "You Clicked at " +Integer.toString(position), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        File d = getExternalCacheDir();
+        File mouseappdir = new File(d, "mouseappdir");
+        mouseappdir.mkdirs();
+        tmpfiledir=mouseappdir.getAbsolutePath();
+        Log.d("CACHEDIR",tmpfiledir);
+    }
+
+    void updateList() {
+        adapter.notifyDataSetChanged();
     }
 
 	@Override
@@ -75,12 +109,14 @@ public class MouseApp extends Activity
         });
     }
 
+    public void publicTL(View v) {
+        getToots();
+    }
     public void quit(View v) {
     }
     public void resetApp(View v) {
         resetClient();
     }
-
     public void detconnect(View v) {
         clientId = pref.getString(String.format("client_id_for_%s", instanceDomain), null);
         clientSecret = pref.getString(String.format("client_secret_for_%s", instanceDomain), null);
@@ -93,12 +129,6 @@ public class MouseApp extends Activity
         }
     }
 
-    public void userok(View v) {
-	    UserInput.userok(v);
-    }
-    public void userko(View v) {
-	    UserInput.userko(v);
-    }
     void askPwd() {
 		runOnUiThread(new Runnable() {
 			@Override
@@ -131,6 +161,7 @@ public class MouseApp extends Activity
                     try {
                         JSONObject json = new JSONObject(res);
                         Log.d("afterLogin",json.toString());
+                        access_token = json.getString("access_token");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -139,4 +170,28 @@ public class MouseApp extends Activity
         }
     }
 
+    void getToots() {
+         connect.getFederatedTL(new NextAction() {
+            public void run(String res) {
+                try {
+                        PrintWriter fout = new PrintWriter(new FileWriter(tmpfiledir+"/example.html"));
+                        fout.println(res);
+                        fout.close();
+
+                    // JSONObject json = new JSONObject(res);
+                    Log.d("afterPublicTL",res);
+                    JSONArray json = new JSONArray(res);
+                    toots.clear();
+                    for (int i=0;i<json.length();i++) {
+                        JSONObject o = (JSONObject)json.get(i);
+                        String txt=o.getString("content");
+                        toots.add(txt);
+                    }
+                    updateList();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 }
