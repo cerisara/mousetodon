@@ -9,7 +9,7 @@ import com.optimaize.langdetect.ngram.*;
 public class DetToot {
     static LangDetect langdetect = null;
     static boolean langdetectpossible = true;
-    String txt, lang="not detected";
+    String txt, lang=null;
 
     public DetToot(String t) {
         txt=t;
@@ -24,6 +24,12 @@ public class DetToot {
         if (langdetectpossible) {
             lang = langdetect.detect(txt);
         }
+    }
+
+    public String getStr() {
+        String s=txt;
+        if (lang!=null) s+=" ("+lang+")";
+        return s;
     }
 }
 

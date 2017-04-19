@@ -1,6 +1,7 @@
 package fr.xtof54.mousetodon;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -23,6 +24,7 @@ public class MouseApp extends Activity
     public static MouseApp main=null;
     public static String access_token=null;
     public static String tmpfiledir=null;
+    private boolean detectlang = true, resetTL = true;
 
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
 
@@ -59,7 +61,6 @@ public class MouseApp extends Activity
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Toast.makeText(MouseApp.this, "You Clicked at " +Integer.toString(position), Toast.LENGTH_SHORT).show();
                         toots.get(position).detectlang();
                         Toast.makeText(MouseApp.this, "Lang: " +toots.get(position).lang, Toast.LENGTH_SHORT).show();
                     }
@@ -70,12 +71,45 @@ public class MouseApp extends Activity
         mouseappdir.mkdirs();
         tmpfiledir=mouseappdir.getAbsolutePath();
         Log.d("CACHEDIR",tmpfiledir);
+
+        detconnect(null);
+    }
+
+    void message(final String s) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+                Toast.makeText(MouseApp.this, s, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private ProgressDialog waitwin = null;
+    void startWaitingWindow(final String s) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+                if (waitwin==null) {
+                    waitwin=ProgressDialog.show(MouseApp.main,"Network operation...",s);
+                }
+            }
+        });
+    }
+    void stopWaitingWindow() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+                if (waitwin!=null) {
+                    waitwin.dismiss();
+                    waitwin=null;
+                }
+            }
+        });
     }
 
     void updateList() {
         adapter.clear();
         for (DetToot t: toots) {
-            adapter.add(t.txt);
+            adapter.add(t.getStr());
         }
         adapter.notifyDataSetChanged();
     }
@@ -101,6 +135,7 @@ public class MouseApp extends Activity
 
 
     private void resetClient() {
+        startWaitingWindow("Trying to connect...");
         connect.registerApp(new NextAction() {
             public void run(String res) {
                 try {
@@ -112,8 +147,11 @@ public class MouseApp extends Activity
                     edit.putString(String.format("client_id_for_%s", instanceDomain), clientId);
                     edit.putString(String.format("client_secret_for_%s", instanceDomain), clientSecret);
                     edit.commit();
+                    stopWaitingWindow();
                     userlogin();
                 } catch (JSONException e) {
+                    stopWaitingWindow();
+                    message("error when connecting");
                     e.printStackTrace();
                 }
             }
@@ -167,14 +205,19 @@ public class MouseApp extends Activity
         if(useremail == null || userpwd == null) {
             askPwd();
         } else {
+            startWaitingWindow("Trying to login...");
             connect.userLogin(clientId,clientSecret,useremail, userpwd, new NextAction() {
                 public void run(String res) {
                     try {
                         JSONObject json = new JSONObject(res);
                         Log.d("afterLogin",json.toString());
                         access_token = json.getString("access_token");
+                        if (access_token!=null) message("Login OK");
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        message("error when login");
+                    } finally {
+                        stopWaitingWindow();
                     }
                 }
             });
@@ -182,25 +225,24 @@ public class MouseApp extends Activity
     }
 
     void getToots() {
-         connect.getFederatedTL(new NextAction() {
+        startWaitingWindow("Getting toots...");
+        connect.getFederatedTL(new NextAction() {
             public void run(String res) {
                 try {
-                    PrintWriter fout = new PrintWriter(new FileWriter(tmpfiledir+"/example.html"));
-                    fout.println(res);
-                    fout.close();
-
-                    // JSONObject json = new JSONObject(res);
-                    Log.d("afterPublicTL",res);
                     JSONArray json = new JSONArray(res);
-                    toots.clear();
+                    if (resetTL) toots.clear();
                     for (int i=0;i<json.length();i++) {
                         JSONObject o = (JSONObject)json.get(i);
                         String txt=o.getString("content");
-                        toots.add(new DetToot(txt));
+                        DetToot dt = new DetToot(txt);
+                        if (detectlang) dt.detectlang();
+                        toots.add(dt);
                     }
                     updateList();
                 } catch (Exception e) {
                     e.printStackTrace();
+                } finally {
+                    stopWaitingWindow();
                 }
             }
         });
