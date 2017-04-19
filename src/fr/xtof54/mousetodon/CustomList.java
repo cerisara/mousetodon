@@ -10,15 +10,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import android.text.Html;
  
-public class CustomList extends ArrayAdapter<String>{
+public class CustomList extends ArrayAdapter<String> {
  
     private final Activity context;
-    ArrayList<String> its;
 
-    public CustomList(Activity context, ArrayList<String> items) {
-        super(context, R.layout.row, items);
+    public CustomList(Activity context, ArrayList<String> tts) {
+        super(context, R.layout.row, tts);
         this.context = context;
-        its=items;
     }
 
     @Override
@@ -26,8 +24,8 @@ public class CustomList extends ArrayAdapter<String>{
         LayoutInflater inflater = context.getLayoutInflater();
         View rowView= inflater.inflate(R.layout.row, null, true);
         TextView txtTitle = (TextView) rowView.findViewById(R.id.txt);
-        ImageView imageView = (ImageView) rowView.findViewById(R.id.img);
-        txtTitle.setText(Html.fromHtml(its.get(position)));
+        // ImageView imageView = (ImageView) rowView.findViewById(R.id.img);
+        txtTitle.setText(Html.fromHtml(getItem(position)));
         // imageView.setImageResource(imageId[position]);
         return rowView;
     }

@@ -1,4 +1,4 @@
-package fr.xtof54.mostodon;
+package fr.xtof54.mousetodon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,24 +6,7 @@ import com.optimaize.langdetect.*;
 import com.optimaize.langdetect.profiles.*;
 import com.optimaize.langdetect.ngram.*;
 
-public class Toot {
-    static LangDetect langdetect = null;
-    static boolean langdetectpossible = true;
-    String txt, lang;
-
-    public void detectlang() {
-        if (!langdetectpossible) return;
-        if (langdetect==null) {
-            langdetect = new LangDetect();
-            if (langdetect==null) langdetectpossible=false;
-        }
-        if (langdetectpossible) {
-            lang = langdetect.detect(txt);
-        }
-    }
-}
-
-class LangDetect {
+public class LangDetect {
     LanguageDetector languageDetector;
 
     public LangDetect() {
@@ -53,6 +36,4 @@ class LangDetect {
         return bestl;
     }
 }
-
-
 

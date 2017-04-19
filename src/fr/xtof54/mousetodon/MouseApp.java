@@ -24,7 +24,7 @@ public class MouseApp extends Activity
     public static String access_token=null;
     public static String tmpfiledir=null;
 
-    ArrayList<String> toots = new ArrayList<String>();
+    ArrayList<DetToot> toots = new ArrayList<DetToot>();
 
     String instanceDomain = "octodon.social";
     Connect connect;
@@ -47,14 +47,21 @@ public class MouseApp extends Activity
         setContentView(R.layout.main);
         pref = getSharedPreferences("MouseApp", MODE_PRIVATE);
         connect=new Connect(instanceDomain);
-
-        adapter = new CustomList(MouseApp.main, toots);
+        {
+            ArrayList<String> tmp = new ArrayList<String>();
+            for (int i=0;i<10;i++) {
+                tmp.add("Emtpy");
+            }
+            adapter = new CustomList(MouseApp.main, tmp);
+        }
         ListView list=(ListView)findViewById(R.id.list);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         Toast.makeText(MouseApp.this, "You Clicked at " +Integer.toString(position), Toast.LENGTH_SHORT).show();
+                        toots.get(position).detectlang();
+                        Toast.makeText(MouseApp.this, "Lang: " +toots.get(position).lang, Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -66,6 +73,10 @@ public class MouseApp extends Activity
     }
 
     void updateList() {
+        adapter.clear();
+        for (DetToot t: toots) {
+            adapter.add(t.txt);
+        }
         adapter.notifyDataSetChanged();
     }
 
@@ -174,9 +185,9 @@ public class MouseApp extends Activity
          connect.getFederatedTL(new NextAction() {
             public void run(String res) {
                 try {
-                        PrintWriter fout = new PrintWriter(new FileWriter(tmpfiledir+"/example.html"));
-                        fout.println(res);
-                        fout.close();
+                    PrintWriter fout = new PrintWriter(new FileWriter(tmpfiledir+"/example.html"));
+                    fout.println(res);
+                    fout.close();
 
                     // JSONObject json = new JSONObject(res);
                     Log.d("afterPublicTL",res);
@@ -185,7 +196,7 @@ public class MouseApp extends Activity
                     for (int i=0;i<json.length();i++) {
                         JSONObject o = (JSONObject)json.get(i);
                         String txt=o.getString("content");
-                        toots.add(txt);
+                        toots.add(new DetToot(txt));
                     }
                     updateList();
                 } catch (Exception e) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FlowLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -9,24 +9,32 @@
     android:layout_height="wrap_content" 
     android:text="Mousetodon app"
     />
-<Button
-    android:layout_width="wrap_content"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:text="Connect"
-    android:onClick="detconnect"
-    />
-<Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Public"
-    android:onClick="publicTL"
-    />
+    >
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect"
+        android:onClick="detconnect"
+        />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Public"
+        android:onClick="publicTL"
+        />
+</LinearLayout>
+
 <ListView
        android:id="@+id/list"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        android:layout_height="fill_parent" >
 
     </ListView>
 
-</FlowLayout>
+</LinearLayout>
 
