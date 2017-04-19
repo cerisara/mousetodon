@@ -305,6 +305,38 @@ public class MouseApp extends Activity
                             idx.add(toots.size());
                             ids.add(id);
                             toots.add(dt);
+                        } else if (typ.equals("follow")) {
+                            if (!o.isNull("account")) {
+                                JSONObject acc = o.getJSONObject("account");
+                                String aut = acc.getString("username")+": ";
+                                DetToot dt = new DetToot("followed by: "+aut);
+                                toots.add(dt);
+                            } else {
+                                DetToot dt = new DetToot("unhandled type: "+typ);
+                                toots.add(dt);
+                            }
+                        } else if (typ.equals("favourite")) {
+                            if (!o.isNull("account")) {
+                                JSONObject acc = o.getJSONObject("account");
+                                String aut = acc.getString("username")+": ";
+                                DetToot dt = new DetToot("favourite by: "+aut);
+                                dt.txt+=dt.getText(o.getJSONObject("status"));
+                                toots.add(dt);
+                            } else {
+                                DetToot dt = new DetToot("unhandled type: "+typ);
+                                toots.add(dt);
+                            }
+                        } else if (typ.equals("reblog")) {
+                            if (!o.isNull("account")) {
+                                JSONObject acc = o.getJSONObject("account");
+                                String aut = acc.getString("username")+": ";
+                                DetToot dt = new DetToot("reblog by: "+aut);
+                                dt.txt+=dt.getText(o.getJSONObject("status"));
+                                toots.add(dt);
+                            } else {
+                                DetToot dt = new DetToot("unhandled type: "+typ);
+                                toots.add(dt);
+                            }
                         } else {
                             DetToot dt = new DetToot("unhandled type: "+typ);
                             toots.add(dt);
@@ -315,13 +347,7 @@ public class MouseApp extends Activity
                     ArrayList<String> stats = getStatuses(ids);
                     for (int i=0;i<stats.size();i++) {
                         JSONObject o = new JSONObject(stats.get(i));
-                        String txt=o.getString("content");
-                        if (txt!=null) {
-                            txt=txt.trim();
-                            if (txt.length()>0) {
-                                toots.get(idx.get(i)).txt=txt;
-                            }
-                        }
+                        toots.set(idx.get(i),new DetToot(o,detectlang));
                     }
                     updateList();
                 } catch (Exception e) {
@@ -342,23 +368,14 @@ public class MouseApp extends Activity
                     if (resetTL) toots.clear();
                     for (int i=0;i<json.length();i++) {
                         JSONObject o = (JSONObject)json.get(i);
-                        String txt=o.getString("content");
-                        if (txt!=null) {
-                            txt=txt.trim();
-                            if (txt.length()>0) {
-                                DetToot dt = new DetToot(txt);
-                                if (detectlang) {
-                                    String lg = dt.detectlang();
-                                    if (lg==null || filterlangs==null) toots.add(dt);
-                                    else {
-                                        for (String s: filterlangs) {
-                                            if (s.equals(lg)) {
-                                                toots.add(dt);
-                                                break;
-                                            }
-                                        }
-                                    }
-                                } else toots.add(dt);
+                        DetToot dt = new DetToot(o,detectlang);
+                        if (dt.lang==null || filterlangs==null) toots.add(dt);
+                        else {
+                            for (String s: filterlangs) {
+                                if (s.equals(dt.lang)) {
+                                    toots.add(dt);
+                                    break;
+                                }
                             }
                         }
                     }
