@@ -61,8 +61,7 @@ public class MouseApp extends Activity
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        toots.get(position).detectlang();
-                        Toast.makeText(MouseApp.this, "Lang: " +toots.get(position).lang, Toast.LENGTH_SHORT).show();
+                        // TODO
                     }
                 });
 
@@ -125,6 +124,9 @@ public class MouseApp extends Activity
 		switch (item.getItemId()) {
 		case R.id.quit:
 			return true;
+		case R.id.nolang:
+            detectlang=!detectlang;
+			return true;
 		case R.id.reset:
 			resetClient();
 			return true;
@@ -159,7 +161,13 @@ public class MouseApp extends Activity
     }
 
     public void publicTL(View v) {
-        getToots();
+        getToots("timelines/public");
+    }
+    public void homeTL(View v) {
+        getToots("timelines/home");
+    }
+    public void noteTL(View v) {
+        getNotifs("notifications");
     }
     public void quit(View v) {
     }
@@ -224,9 +232,87 @@ public class MouseApp extends Activity
         }
     }
 
-    void getToots() {
+    private NextAction torun = null;
+
+    void getStatus(final int id) {
+        connect.getTL("statuses/"+Integer.toString(id),new NextAction() {
+            public void run(String res) {
+                try {
+                    if (torun!=null) {
+                        torun.run(res);
+                        torun=null;
+                    } else {
+                        JSONObject json = new JSONObject(res);
+                        // TODO
+                    }
+                } catch (Exception e) {
+                }
+            }
+        });
+    }
+
+    ArrayList<String> getStatuses(ArrayList<Integer> ids) {
+        ArrayList<String> lres = new ArrayList<String>();
+        for (int id: ids) {
+            String res = connect.blockGetTL("statuses/"+Integer.toString(id));
+            lres.add(res);
+        }
+        return lres;
+    }
+
+
+    void getNotifs(final String tl) {
+        startWaitingWindow("Getting notifs...");
+        connect.getTL(tl,new NextAction() {
+            public void run(String res) {
+                try {
+                    JSONArray json = new JSONArray(res);
+                    if (resetTL) toots.clear();
+
+                    // just pre-download list of notifications
+                    ArrayList<Integer> idx = new ArrayList<Integer>();
+                    final ArrayList<Integer> ids = new ArrayList<Integer>();
+                    for (int i=0;i<json.length();i++) {
+                        JSONObject o = (JSONObject)json.get(i);
+                        String typ = o.getString("type");
+                        if (typ.equals("mention")) {
+                            JSONObject toot =o.getJSONObject("status");
+                            int id = toot.getInt("id");
+                            DetToot dt = new DetToot("mention: "+Integer.toString(id));
+                            idx.add(toots.size());
+                            ids.add(id);
+                            toots.add(dt);
+                        } else {
+                            DetToot dt = new DetToot("unhandled type: "+typ);
+                            toots.add(dt);
+                        }
+                    }
+
+                    // now download all statutes
+                    ArrayList<String> stats = getStatuses(ids);
+                    for (int i=0;i<stats.size();i++) {
+                        JSONObject o = new JSONObject(stats.get(i));
+                        String txt=o.getString("content");
+                        if (txt!=null) {
+                            txt=txt.trim();
+                            if (txt.length()>0) {
+                                toots.get(idx.get(i)).txt=txt;
+                            }
+                        }
+                    }
+                    updateList();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    stopWaitingWindow();
+                }
+            }
+        });
+    }
+
+    void getToots(final String tl) {
         startWaitingWindow("Getting toots...");
-        connect.getFederatedTL(new NextAction() {
+        connect.getTL(tl,new NextAction() {
             public void run(String res) {
                 try {
                     JSONArray json = new JSONArray(res);
@@ -234,9 +320,14 @@ public class MouseApp extends Activity
                     for (int i=0;i<json.length();i++) {
                         JSONObject o = (JSONObject)json.get(i);
                         String txt=o.getString("content");
-                        DetToot dt = new DetToot(txt);
-                        if (detectlang) dt.detectlang();
-                        toots.add(dt);
+                        if (txt!=null) {
+                            txt=txt.trim();
+                            if (txt.length()>0) {
+                                DetToot dt = new DetToot(txt);
+                                if (detectlang) dt.detectlang();
+                                toots.add(dt);
+                            }
+                        }
                     }
                     updateList();
                 } catch (Exception e) {

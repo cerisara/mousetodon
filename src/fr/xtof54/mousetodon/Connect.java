@@ -51,11 +51,40 @@ public class Connect {
         new ConnectTask().execute(args);
     }
 
-    public void getFederatedTL(NextAction next) {
+    public void getTL(final String tl, NextAction next) {
         List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
-        String surl = String.format("https://%s/api/v1/timelines/public", domain);
+        String surl = String.format("https://%s/api/v1/"+tl, domain);
         Object[] args = {surl, params, next};
         new GetTask().execute(args);
+    }
+    public String blockGetTL(final String tl) {
+        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
+        String surl = String.format("https://%s/api/v1/"+tl, domain);
+        String res=null;
+        try {
+            URL url = new URL(surl);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("Authorization", "Bearer "+MouseApp.access_token);
+            urlConnection.connect();
+
+            int rep = urlConnection.getResponseCode();
+            BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+
+            while((line = br.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+
+            br.close();
+            res=sb.toString();
+            urlConnection.disconnect();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return res; 
     }
 
     private String getQuery(List<Pair<String, String>> params) throws UnsupportedEncodingException {
@@ -82,14 +111,17 @@ public class Connect {
         @Override
         protected String doInBackground(Object... args) {
             String surl=(String)args[0];
-            List<Pair<String, String>> params = (List<Pair<String, String>>)args[1];
             next=(NextAction)args[2];
             String res=null;
             try {
                 URL url = new URL(surl);
+                System.out.println("COCOCOCOCCOOOOOOOOOOOOOOOOOOOOOOOOOO "+surl);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("Authorization", MouseApp.access_token);
+                urlConnection.setRequestProperty("Authorization", "Bearer "+MouseApp.access_token);
                 urlConnection.connect();
+
+                int rep = urlConnection.getResponseCode();
+                System.out.println("ZOCOCOCOCCOOOOOOOOOOOOOOOOOOOOOOOOOO "+Integer.toString(rep));
 
                 BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                 StringBuilder sb = new StringBuilder();
