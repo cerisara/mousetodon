@@ -15,15 +15,17 @@ public class DetToot {
         txt=t;
     }
 
-    public void detectlang() {
-        if (!langdetectpossible) return;
+    public String detectlang() {
+        if (!langdetectpossible) return null;
         if (langdetect==null) {
             langdetect = new LangDetect();
             if (langdetect==null) langdetectpossible=false;
         }
         if (langdetectpossible) {
             lang = langdetect.detect(txt);
+            return lang;
         }
+        return null;
     }
 
     public String getStr() {

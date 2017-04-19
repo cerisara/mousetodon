@@ -24,9 +24,10 @@ public class MouseApp extends Activity
     public static MouseApp main=null;
     public static String access_token=null;
     public static String tmpfiledir=null;
-    private boolean detectlang = true, resetTL = true;
+    private boolean detectlang = false, resetTL = true;
 
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
+    String[] filterlangs = null;
 
     String instanceDomain = "octodon.social";
     Connect connect;
@@ -126,6 +127,7 @@ public class MouseApp extends Activity
 			return true;
 		case R.id.nolang:
             detectlang=!detectlang;
+            if (detectlang) filterlang(); else filterlangs=null;
 			return true;
 		case R.id.reset:
 			resetClient();
@@ -135,6 +137,27 @@ public class MouseApp extends Activity
 		}
 	}
 
+    void filterlang() {
+        String langs = pref.getString(String.format("langs_for_%s", instanceDomain), null);
+        if (langs==null) langs="";
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+                LangInput.show(main, new NextAction() {
+                    public void run(String res) {
+                        String[] ss = res.split(" ");
+                        if (ss.length>0) {
+                            SharedPreferences.Editor edit = pref.edit();
+                            edit.putString(String.format("langs_for_%s", instanceDomain), res);
+                            edit.commit();
+                            filterlangs = ss;
+                        }
+                    }
+                });
+            }
+        });
+
+    }
 
     private void resetClient() {
         startWaitingWindow("Trying to connect...");
@@ -324,8 +347,18 @@ public class MouseApp extends Activity
                             txt=txt.trim();
                             if (txt.length()>0) {
                                 DetToot dt = new DetToot(txt);
-                                if (detectlang) dt.detectlang();
-                                toots.add(dt);
+                                if (detectlang) {
+                                    String lg = dt.detectlang();
+                                    if (lg==null || filterlangs==null) toots.add(dt);
+                                    else {
+                                        for (String s: filterlangs) {
+                                            if (s.equals(lg)) {
+                                                toots.add(dt);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } else toots.add(dt);
                             }
                         }
                     }
