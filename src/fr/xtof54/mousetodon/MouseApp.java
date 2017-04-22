@@ -31,7 +31,7 @@ public class MouseApp extends Activity
     String[] filterlangs = null;
 
     String instanceDomain = "octodon.social";
-    Connect connect;
+    Connect connect=null;
 
     String clientId=null, clientSecret=null;
     String useremail=null, userpwd=null;
@@ -52,13 +52,13 @@ public class MouseApp extends Activity
         setContentView(R.layout.main);
         pref = getSharedPreferences("MouseApp", MODE_PRIVATE);
         connect=new Connect(instanceDomain);
-        {
-            ArrayList<String> tmp = new ArrayList<String>();
+        ArrayList<String> tmp = new ArrayList<String>();
+        if (false) {
             for (int i=0;i<10;i++) {
                 tmp.add("Emtpy");
             }
-            adapter = new CustomList(MouseApp.main, tmp);
         }
+        adapter = new CustomList(MouseApp.main, tmp);
         ListView list=(ListView)findViewById(R.id.list);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -73,8 +73,34 @@ public class MouseApp extends Activity
         mouseappdir.mkdirs();
         tmpfiledir=mouseappdir.getAbsolutePath();
         Log.d("CACHEDIR",tmpfiledir);
+        imgsinrow.clear();
 
         detconnect(null);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the user's current game state
+        //
+        // TODO
+        //
+        // savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
+        // savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        // Always call the superclass so it can restore the view hierarchy
+        super.onRestoreInstanceState(savedInstanceState);
+
+        
+
+        // Restore state members from saved instance
+        // mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+        // mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
     }
 
     void message(final String s) {
@@ -196,6 +222,25 @@ public class MouseApp extends Activity
     public void noteTL(View v) {
         getNotifs("notifications");
     }
+    public void writeToot(View v) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+                UserWritings.show(main, new NextAction() {
+                    public void run(String res) {
+                        if (res.length()>0) {
+                            startWaitingWindow("Trying to login...");
+                            connect.sendToot(res, new NextAction() {
+                                public void run(String res) {
+                                    stopWaitingWindow();
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
     public void quit(View v) {
     }
     public void resetApp(View v) {
@@ -243,11 +288,18 @@ public class MouseApp extends Activity
             startWaitingWindow("Trying to login...");
             connect.userLogin(clientId,clientSecret,useremail, userpwd, new NextAction() {
                 public void run(String res) {
+                    if (res==null) {
+                        stopWaitingWindow();
+                        return;
+                    }
                     try {
                         JSONObject json = new JSONObject(res);
                         Log.d("afterLogin",json.toString());
                         access_token = json.getString("access_token");
-                        if (access_token!=null) message("Login OK");
+                        if (access_token!=null) {
+                            System.out.println("AAAAAAAAAAAAccess "+access_token);
+                            message("Login OK");
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                         message("error when login");

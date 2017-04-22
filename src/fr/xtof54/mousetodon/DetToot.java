@@ -69,7 +69,7 @@ public class DetToot {
     }
 
     public String getStr() {
-        String s=txt;
+        String s=""+txt;
         if (lang!=null) s+=" ("+lang+")";
         return s;
     }

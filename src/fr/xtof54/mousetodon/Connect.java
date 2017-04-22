@@ -32,8 +32,8 @@ public class Connect {
         Log.d("Connect","register app");
         List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
         params.add(new Pair<String, String>("client_name", "Mousetodon"));
-        params.add(new Pair<String, String>("redirect_uris", "urn:ietf:wg:oauth:2.0:oob"));
         params.add(new Pair<String, String>("scopes", "read write follow"));
+        params.add(new Pair<String, String>("redirect_uris", "urn:ietf:wg:oauth:2.0:oob"));
         String surl = String.format("https://%s/api/v1/apps", domain);
         Object[] args = {surl, params, next};
         new ConnectTask().execute(args);
@@ -46,11 +46,26 @@ public class Connect {
         params.add(new Pair<String, String>("grant_type", "password"));
         params.add(new Pair<String, String>("username", email));
         params.add(new Pair<String, String>("password", pwd));
+        params.add(new Pair<String, String>("scope", "read write follow"));
         String surl = String.format("https://%s/oauth/token", domain);
         Object[] args = {surl, params, next};
         new ConnectTask().execute(args);
     }
 
+    public void sendToot(String s, NextAction next) {
+        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
+        params.add(new Pair<String, String>("status", s));
+        /*
+         *  in_reply_to_id (optional): local ID of the status you want to reply to
+            media_ids (optional): array of media IDs to attach to the status (maximum 4)
+            sensitive (optional): set this to mark the media of the status as NSFW
+            spoiler_text (optional): text to be shown as a warning before the actual content
+            visibility (optional): either "direct", "private", "unlisted" or "public"
+            */
+        String surl = String.format("https://%s/api/v1/statuses", domain);
+        Object[] args = {surl, params, next};
+        new PostTask().execute(args);
+    }
     public void getTL(final String tl, NextAction next) {
         List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
         String surl = String.format("https://%s/api/v1/"+tl, domain);
@@ -162,6 +177,55 @@ public class Connect {
                 urlConnection.setRequestMethod("POST");
                 OutputStream os = urlConnection.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+                String ssq = getQuery(params);
+                System.out.println("DEBUGSSSSSSS "+ssq);
+                writer.write(ssq);
+                writer.flush();
+                writer.close();
+                os.close();
+
+                urlConnection.connect();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+
+                while((line = br.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+
+                br.close();
+                res=sb.toString();
+                urlConnection.disconnect();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(String response) {
+            if (next!=null) {next.run(response);}
+        }
+    }
+
+    class PostTask extends AsyncTask<Object, Void, String> {
+        NextAction next=null;
+        @Override
+        protected String doInBackground(Object... args) {
+            String surl=(String)args[0];
+            List<Pair<String, String>> params = (List<Pair<String, String>>)args[1];
+            next=(NextAction)args[2];
+            String res=null;
+            try {
+                URL url = new URL(surl);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Authorization", "Bearer "+MouseApp.access_token);
+                OutputStream os = urlConnection.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
                 writer.write(getQuery(params));
                 writer.flush();
                 writer.close();
@@ -193,6 +257,7 @@ public class Connect {
             if (next!=null) {next.run(response);}
         }
     }
+
 
 }
 

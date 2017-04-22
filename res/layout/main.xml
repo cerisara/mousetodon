@@ -28,6 +28,13 @@
         android:text="Public"
         android:onClick="publicTL"
         />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Toot"
+        android:onClick="writeToot"
+        />
+
 </LinearLayout>
 
 <ListView

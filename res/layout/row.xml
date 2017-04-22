@@ -3,21 +3,21 @@
     android:orientation="horizontal"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="4dp" >
+    android:padding="0dp" >
 
     <!-- Views with default image and text, for demonstration.
     They will be changed in the adapter -->
     <ImageView
         android:layout_width="wrap_content"
-        android:layout_height="35dp"
+        android:layout_height="40dp"
         android:id="@+id/img"
-        android:layout_marginRight="8dp"
-        android:layout_marginLeft="4dp" />
+        android:layout_marginRight="0dp"
+        android:layout_marginLeft="0dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Title"
         android:id="@+id/txt"
         android:layout_gravity="center_vertical" />
