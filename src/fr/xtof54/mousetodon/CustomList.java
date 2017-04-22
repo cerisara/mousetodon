@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import android.text.Html;
+import android.graphics.Bitmap;
  
 public class CustomList extends ArrayAdapter<String> {
  
@@ -24,9 +25,12 @@ public class CustomList extends ArrayAdapter<String> {
         LayoutInflater inflater = context.getLayoutInflater();
         View rowView= inflater.inflate(R.layout.row, null, true);
         TextView txtTitle = (TextView) rowView.findViewById(R.id.txt);
-        // ImageView imageView = (ImageView) rowView.findViewById(R.id.img);
+        ImageView imageView = (ImageView) rowView.findViewById(R.id.img);
         txtTitle.setText(Html.fromHtml(getItem(position)));
-        // imageView.setImageResource(imageId[position]);
+        if (MouseApp.imgsinrow.size()>position) {
+            Bitmap bMap = MouseApp.imgsinrow.get(position);
+            imageView.setImageBitmap(bMap);
+        }
         return rowView;
     }
 }

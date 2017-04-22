@@ -18,6 +18,7 @@ import java.io.FileWriter;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.graphics.Bitmap;
 
 public class MouseApp extends Activity
 {
@@ -40,6 +41,7 @@ public class MouseApp extends Activity
     SharedPreferences pref;
     private static String OAUTH_SCOPES = "read";
     CustomList adapter=null;
+    public static ArrayList<Bitmap> imgsinrow = new ArrayList<Bitmap>();
 
     /** Called when the activity is first created. */
     @Override
@@ -108,8 +110,10 @@ public class MouseApp extends Activity
 
     void updateList() {
         adapter.clear();
+        imgsinrow.clear();
         for (DetToot t: toots) {
             adapter.add(t.getStr());
+            imgsinrow.add(t.getUserIcon());
         }
         adapter.notifyDataSetChanged();
     }

@@ -9,11 +9,13 @@ import com.optimaize.langdetect.ngram.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
+import android.graphics.Bitmap;
 
 public class DetToot {
     static LangDetect langdetect = null;
     static boolean langdetectpossible = true;
     String txt, lang=null;
+    private Bitmap usericon=null;
 
     public DetToot(JSONObject json, boolean detectlang) {
         String texte = getText(json);
@@ -28,6 +30,11 @@ public class DetToot {
         txt=texte;
         if (detectlang) detectlang();
     }
+
+    public Bitmap getUserIcon() {
+        return usericon;
+    }
+
     String getText(JSONObject json) {
         if (json==null) return "";
         try {
@@ -35,6 +42,7 @@ public class DetToot {
             if (!json.isNull("account")) {
                 JSONObject acc = json.getJSONObject("account");
                 aut = acc.getString("username")+": ";
+                usericon = DetIcons.downloadImg(acc);
             }
             String txt=json.getString("content");
             return aut+txt.trim();
