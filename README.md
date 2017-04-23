@@ -16,11 +16,10 @@ Target features I plan to implement:
 
 - Search in toots
 - Switch between several accounts easily
-- Various language advanced features (words clouds, clustering...) (I'm an NLP researcher after all !)
+- Various language advanced features (words clouds, clustering...) (I'm in NLP after all !)
 
 Current limitations:
 
-- Does not show images / videos
 - Does not show reply-history of toots
 - Does not show user details
 - Does not allow (yet) to reblog (in progress...)
