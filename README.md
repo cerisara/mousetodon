@@ -16,14 +16,17 @@ Target features I would like to implement:
 
 - Search in toots
 - Show public timelines of any instance without account
-- Write toots
+- Write toots, reply, boost, unboost
 - Switch between several accounts easily
 - Various language advanced features (words clouds, clustering...) (I'm an NLP researcher after all !)
 
 Current limitations: (which make it really beta for now; gonna implement them asap)
 
 - Does not show images / videos
-- Does not allow to reply, reblog nor favorize (not yet, in progress...)
+- Does not show reply-history of toots
+- Does not show user details
+- Does not allow (yet) to reblog (in progress...)
+- Does not support content warnings, nor media uploads
 
 -----------
 

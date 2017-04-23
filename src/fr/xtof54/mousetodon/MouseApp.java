@@ -43,6 +43,8 @@ public class MouseApp extends Activity
     CustomList adapter=null;
     public static ArrayList<Bitmap> imgsinrow = new ArrayList<Bitmap>();
 
+    public static int curtootidx = -1;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -53,22 +55,17 @@ public class MouseApp extends Activity
         pref = getSharedPreferences("MouseApp", MODE_PRIVATE);
         connect=new Connect(instanceDomain);
         ArrayList<String> tmp = new ArrayList<String>();
-        if (false) {
-            for (int i=0;i<10;i++) {
-                tmp.add("Emtpy");
-            }
-        }
         adapter = new CustomList(MouseApp.main, tmp);
         ListView list=(ListView)findViewById(R.id.list);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        final int idx = position;
+                        curtootidx = position;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                VisuToot.show(idx);
+                                VisuToot.show(curtootidx);
                             }
                         });
                     }
@@ -141,13 +138,18 @@ public class MouseApp extends Activity
     }
 
     void updateList() {
-        adapter.clear();
-        imgsinrow.clear();
-        for (DetToot t: toots) {
-            adapter.add(t.getStr());
-            imgsinrow.add(t.getUserIcon());
-        }
-        adapter.notifyDataSetChanged();
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+                adapter.clear();
+                imgsinrow.clear();
+                for (DetToot t: toots) {
+                    adapter.add(t.getStr());
+                    imgsinrow.add(t.getUserIcon());
+                }
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 
 	@Override
@@ -221,9 +223,13 @@ public class MouseApp extends Activity
 
     public void closeOnetoot(View v) {
         VisuToot.close();
+        updateList();
     }
-    public void reply(View v) {
-        System.out.println("REPLYYYYYYYYYYYYYYYYY");
+    public void boost(View v) {
+        boost();
+    }
+    public void unboost(View v) {
+        unboost();
     }
     public void publicTL(View v) {
         getToots("timelines/public");
@@ -234,6 +240,9 @@ public class MouseApp extends Activity
     public void noteTL(View v) {
         getNotifs("notifications");
     }
+    public void reply(View v) {
+        writeToot(null);
+    }
     public void writeToot(View v) {
 		runOnUiThread(new Runnable() {
 			@Override
@@ -241,7 +250,7 @@ public class MouseApp extends Activity
                 UserWritings.show(main, new NextAction() {
                     public void run(String res) {
                         if (res.length()>0) {
-                            startWaitingWindow("Trying to login...");
+                            startWaitingWindow("Sending toot...");
                             connect.sendToot(res, new NextAction() {
                                 public void run(String res) {
                                     stopWaitingWindow();
@@ -427,6 +436,35 @@ public class MouseApp extends Activity
         });
     }
 
+    void unboost() {
+        if (curtootidx>=0 && toots.get(curtootidx).id>=0 && toots.get(curtootidx).boosted) {
+            startWaitingWindow("Unboosting toot...");
+            connect.unboost(toots.get(curtootidx).id, new NextAction() {
+                public void run(String res) {
+                    stopWaitingWindow();
+                    // TODO check if error here
+                    toots.get(curtootidx).boosted=false;
+                }
+            });
+        } else {
+            message("Cannot unboost: no toot id");
+        }
+    }
+
+    void boost() {
+        if (curtootidx>=0 && toots.get(curtootidx).id>=0 && !toots.get(curtootidx).boosted) {
+            startWaitingWindow("Boosting toot...");
+            connect.boost(toots.get(curtootidx).id, new NextAction() {
+                public void run(String res) {
+                    stopWaitingWindow();
+                    // TODO check if error here
+                    toots.get(curtootidx).boosted=true;
+                }
+            });
+        } else {
+            message("Cannot boost: no toot id");
+        }
+    }
     void getToots(final String tl) {
         startWaitingWindow("Getting toots...");
         connect.getTL(tl,new NextAction() {

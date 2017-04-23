@@ -15,10 +15,13 @@ public class DetToot {
     static LangDetect langdetect = null;
     static boolean langdetectpossible = true;
     String txt, lang=null;
+    public int id=-1;
+    public boolean boosted = false;
     private Bitmap usericon=null;
 
     public DetToot(JSONObject json, boolean detectlang) {
         String texte = getText(json);
+        getExtraInfos(json);
         try {
             if (!json.isNull("reblog")) {
                 JSONObject reblog = json.getJSONObject("reblog");
@@ -33,6 +36,18 @@ public class DetToot {
 
     public Bitmap getUserIcon() {
         return usericon;
+    }
+
+    private void getExtraInfos(JSONObject json) {
+        if (json!=null) {
+            try {
+                id = json.getInt("id");
+                if (json.isNull("favourited")) boosted=false;
+                else boosted = json.getBoolean("favourited");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     String getText(JSONObject json) {
@@ -68,9 +83,12 @@ public class DetToot {
         return null;
     }
 
+    /* The method that is called to show the toot in the ListView
+     * */
     public String getStr() {
         String s=""+txt;
         if (lang!=null) s+=" ("+lang+")";
+        if (boosted) s="* "+s;
         return s;
     }
 }

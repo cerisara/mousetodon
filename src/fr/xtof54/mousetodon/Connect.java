@@ -55,6 +55,10 @@ public class Connect {
     public void sendToot(String s, NextAction next) {
         List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
         params.add(new Pair<String, String>("status", s));
+        if (MouseApp.curtootidx>=0 && MouseApp.main.toots.get(MouseApp.curtootidx).id>=0) {
+            System.out.println("replying to toot "+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id));
+            params.add(new Pair<String, String>("in_reply_to_id", Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id)));
+        }
         /*
          *  in_reply_to_id (optional): local ID of the status you want to reply to
             media_ids (optional): array of media IDs to attach to the status (maximum 4)
@@ -63,6 +67,18 @@ public class Connect {
             visibility (optional): either "direct", "private", "unlisted" or "public"
             */
         String surl = String.format("https://%s/api/v1/statuses", domain);
+        Object[] args = {surl, params, next};
+        new PostTask().execute(args);
+    }
+    public void boost(int id, NextAction next) {
+        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
+        String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id)+"/favourite", domain);
+        Object[] args = {surl, params, next};
+        new PostTask().execute(args);
+    }
+    public void unboost(int id, NextAction next) {
+        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
+        String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id)+"/unfavourite", domain);
         Object[] args = {surl, params, next};
         new PostTask().execute(args);
     }

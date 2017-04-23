@@ -15,6 +15,7 @@ public class VisuToot {
 	static AlertDialog dialog=null;
 
     public static void close() {
+        MouseApp.curtootidx=-1;
         if (dialog!=null) {
             dialog.dismiss();
             dialog=null;

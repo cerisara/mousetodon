@@ -12,16 +12,19 @@ import java.util.ArrayList;
 public class UserWritings {
 	static AlertDialog dialog;
 	static NextAction next;
+
     public static void show(Activity main, final NextAction next) {
 	    LangInput.next=next;
 
         LayoutInflater inflater = LayoutInflater.from(main);
         final View dialogview = inflater.inflate(R.layout.tootinput, null);
 
-
         dialog = new AlertDialog.Builder(main).create();
         dialog.setTitle("Please write your toot");
         dialog.setView(dialogview);
+        if (MouseApp.curtootidx>=0) {
+            // TODO: this is a reply, so insert @user in text field
+        }
         dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
