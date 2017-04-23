@@ -1,4 +1,5 @@
-[](mousetodon.jpg)
+
+![Mousetodon](./mousetodon.jpg)
 
 This is an application for reading Mastodon toots.
 It is in early development stage for now.

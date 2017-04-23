@@ -223,6 +223,7 @@ public class MouseApp extends Activity
         VisuToot.close();
     }
     public void reply(View v) {
+        System.out.println("REPLYYYYYYYYYYYYYYYYY");
     }
     public void publicTL(View v) {
         getToots("timelines/public");

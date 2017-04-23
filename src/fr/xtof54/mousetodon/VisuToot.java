@@ -33,7 +33,7 @@ public class VisuToot {
         }
 
         dialog = new AlertDialog.Builder(main).create();
-        dialog.setTitle("Toot details");
+        dialog.setTitle("Toot medias & details");
         //dialog.setMessage("Enter creds");
         dialog.setView(dialogview);
         dialog.show();
