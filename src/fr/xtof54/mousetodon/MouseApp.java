@@ -29,6 +29,8 @@ public class MouseApp extends Activity
 
     public boolean appRegistered=false;
     public boolean userLogged=false;
+    public int maxid=-1;
+    public int lastTL=-1;
 
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
     String[] filterlangs = null;
@@ -61,17 +63,20 @@ public class MouseApp extends Activity
         ListView list=(ListView)findViewById(R.id.list);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        curtootidx = position;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                VisuToot.show(curtootidx);
-                            }
-                        });
-                    }
-                });
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position>=toots.size()) getOlderToots();
+                else {
+                    curtootidx = position;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            VisuToot.show(curtootidx);
+                        }
+                    });
+                }
+            }
+        });
 
         File d = getExternalCacheDir();
         File mouseappdir = new File(d, "mouseappdir");
@@ -262,6 +267,7 @@ public class MouseApp extends Activity
                     adapter.add(t.getStr());
                     imgsinrow.add(t.getUserIcon());
                 }
+                adapter.add("[Press to get older toots]");
                 adapter.notifyDataSetChanged();
             }
         });
@@ -309,7 +315,26 @@ public class MouseApp extends Activity
                 });
             }
         });
+    }
 
+    public void getOlderToots() {
+        for (int i=toots.size()-1;i>=0;i--)
+            if (toots.get(i).id>=0) {
+                maxid=toots.get(i).id-1;
+                break;
+            }
+        if (connect!=null&&userLogged)
+            switch(lastTL) {
+                case 0: 
+                    getToots("timelines/home"); break;
+                case 1: 
+                    getNotifs("notifications"); break;
+                case 2: 
+                    getToots("timelines/public"); break;
+                default:
+                    message("ERROR OLDER TOOTS");
+            }
+        else message("not connected");
     }
 
     public void closeOnetoot(View v) {
@@ -323,16 +348,22 @@ public class MouseApp extends Activity
         unboost();
     }
     public void publicTL(View v) {
+        lastTL=2;
+        maxid=-1;
         if (connect!=null&&userLogged)
             getToots("timelines/public");
         else message("not connected");
     }
     public void homeTL(View v) {
+        lastTL=0;
+        maxid=-1;
         if (connect!=null&&userLogged)
             getToots("timelines/home");
         else message("not connected");
     }
     public void noteTL(View v) {
+        lastTL=1;
+        maxid=-1;
         if (connect!=null&&userLogged)
             getNotifs("notifications");
         else message("not connected");
@@ -500,11 +531,12 @@ public class MouseApp extends Activity
         }
     }
     void getToots(final String tl) {
-        startWaitingWindow("Getting toots...");
+        startWaitingWindow("Getting toots... "+Integer.toString(maxid));
         connect.getTL(tl,new NextAction() {
             public void run(String res) {
                 try {
                     JSONArray json = new JSONArray(res);
+                    System.out.println("GOTTOOTS "+Integer.toString(json.length()));
                     if (resetTL) toots.clear();
                     for (int i=0;i<json.length();i++) {
                         JSONObject o = (JSONObject)json.get(i);

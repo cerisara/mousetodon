@@ -85,6 +85,7 @@ public class Connect {
     public void getTL(final String tl, NextAction next) {
         List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
         String surl = String.format("https://%s/api/v1/"+tl, domain);
+        if (MouseApp.main.maxid>=0) surl = String.format("https://%s/api/v1/"+tl+"?max_id="+Integer.toString(MouseApp.main.maxid), domain);
         Object[] args = {surl, params, next};
         new GetTask().execute(args);
     }

@@ -18,6 +18,7 @@ public class DetToot {
     public int id=-1;
     public boolean boosted = false;
     private Bitmap usericon=null;
+    public String date="";
     ArrayList<String> medias = new ArrayList<String>();
 
     public DetToot(JSONObject json, boolean detectlang) {
@@ -45,8 +46,12 @@ public class DetToot {
         if (json!=null) {
             try {
                 id = json.getInt("id");
+
+                if (!json.isNull("created_at")) date=json.getString("created_at");
+
                 if (json.isNull("favourited")) boosted=false;
                 else boosted = json.getBoolean("favourited");
+
                 JSONArray meds = json.getJSONArray("media_attachments");
                 if (meds!=null) {
                     for (int i=0;i<meds.length();i++) {
@@ -105,6 +110,7 @@ public class DetToot {
         if (lang!=null) s+=" ("+lang+")";
         if (boosted) s="* "+s;
         if (medias.size()>0) s="MED "+s;
+        if (date.length()>0) s=date+" "+s;
         return s;
     }
 }
