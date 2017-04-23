@@ -18,6 +18,7 @@ public class DetToot {
     public int id=-1;
     public boolean boosted = false;
     private Bitmap usericon=null;
+    ArrayList<String> medias = new ArrayList<String>();
 
     public DetToot(JSONObject json, boolean detectlang) {
         String texte = getText(json);
@@ -39,11 +40,20 @@ public class DetToot {
     }
 
     private void getExtraInfos(JSONObject json) {
+        medias.clear();
         if (json!=null) {
             try {
                 id = json.getInt("id");
                 if (json.isNull("favourited")) boosted=false;
                 else boosted = json.getBoolean("favourited");
+                JSONArray meds = json.getJSONArray("media_attachments");
+                if (meds!=null) {
+                    for (int i=0;i<meds.length();i++) {
+                        JSONObject mm = meds.getJSONObject(i);
+                        if (!mm.isNull("url")) medias.add(mm.getString("url"));
+                        else if (!mm.isNull("remote_url")) medias.add(mm.getString("remote_url"));
+                    }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -89,6 +99,7 @@ public class DetToot {
         String s=""+txt;
         if (lang!=null) s+=" ("+lang+")";
         if (boosted) s="* "+s;
+        if (medias.size()>0) s="MED "+s;
         return s;
     }
 }
