@@ -27,10 +27,13 @@ public class MouseApp extends Activity
     public static String tmpfiledir=null;
     private boolean detectlang = false, resetTL = true;
 
+    public boolean appRegistered=false;
+    public boolean userLogged=false;
+
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
     String[] filterlangs = null;
 
-    String instanceDomain = "octodon.social";
+    String instanceDomain = "";
     Connect connect=null;
 
     String clientId=null, clientSecret=null;
@@ -53,7 +56,6 @@ public class MouseApp extends Activity
         MouseApp.main=this;
         setContentView(R.layout.main);
         pref = getSharedPreferences("MouseApp", MODE_PRIVATE);
-        connect=new Connect(instanceDomain);
         ArrayList<String> tmp = new ArrayList<String>();
         adapter = new CustomList(MouseApp.main, tmp);
         ListView list=(ListView)findViewById(R.id.list);
@@ -78,7 +80,120 @@ public class MouseApp extends Activity
         Log.d("CACHEDIR",tmpfiledir);
         imgsinrow.clear();
 
-        detconnect(null);
+        serverStage0();
+    }
+
+    public void serverStage0() {
+        // check if we know the instance
+        instanceDomain = pref.getString("mouseapp_inst0", null);
+        if (instanceDomain==null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    UserInput.show(main, new NextAction() {
+                        public void run(String res) {
+                            String[] ss = res.split(" ");
+                            if (ss.length>2) {
+                                useremail=ss[0];
+                                userpwd=ss[1];
+                                instanceDomain=ss[2];
+                                if (useremail.length()==0 || userpwd.length()==0 || instanceDomain.length()==0)
+                                    message("All 3 fields are mandatory");
+                                else {
+                                    SharedPreferences.Editor edit = pref.edit();
+                                    edit.putString("mouseapp_inst0", instanceDomain);
+                                    edit.putString(String.format("user_for_%s", instanceDomain), useremail);
+                                    edit.putString(String.format("pswd_for_%s", instanceDomain), userpwd);
+                                    edit.commit();
+                                    serverStage1();
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        } else {
+            serverStage1();
+        }
+    }
+    public void serverStage1() {
+        // check if the app is registered
+        connect = new Connect(instanceDomain);
+        clientId = pref.getString(String.format("client_id_for_%s", instanceDomain), null);
+        clientSecret = pref.getString(String.format("client_secret_for_%s", instanceDomain), null);
+        if (clientId==null||clientSecret==null) {
+            appRegistered=false;
+            startWaitingWindow("Trying to register client...");
+            connect.registerApp(new NextAction() {
+                public void run(String res) {
+                    boolean goon=false;
+                    try {
+                        JSONObject json = new JSONObject(res);
+                        if (json!=null) {
+                            Log.d("afterRegApp",json.toString());
+                            String clientId = json.getString("client_id");
+                            String clientSecret = json.getString("client_secret");
+                            if (clientId!=null&&clientSecret!=null) {
+                                SharedPreferences.Editor edit = pref.edit();
+                                edit.putString(String.format("client_id_for_%s", instanceDomain), clientId);
+                                edit.putString(String.format("client_secret_for_%s", instanceDomain), clientSecret);
+                                edit.commit();
+                                MouseApp.main.appRegistered=true;
+                                message("App registered on "+instanceDomain);
+                                // everytime we register a new app, we automatically login the user
+                                goon=true;
+                            } else message("Problem client registration");
+                        } else message("Problem client json registration");
+                    } catch (JSONException e) {
+                        MouseApp.main.appRegistered=false;
+                        message("error when registrating");
+                        e.printStackTrace();
+                    } finally {
+                        stopWaitingWindow();
+                    }
+                    if (goon) serverStage2();
+                }
+            });
+        } else {
+            serverStage2();
+        }
+    }
+
+    public void serverStage2() {
+        // check login
+        useremail = pref.getString(String.format("user_for_%s", instanceDomain), null);
+        userpwd   = pref.getString(String.format("pswd_for_%s", instanceDomain), null);
+        clientId = pref.getString(String.format("client_id_for_%s", instanceDomain), null);
+        clientSecret = pref.getString(String.format("client_secret_for_%s", instanceDomain), null);
+        if (clientId==null || clientSecret==null || connect==null || useremail==null || userpwd==null) message("ERROR no user creds");
+        else {
+            startWaitingWindow("Trying to login...");
+            connect.userLogin(clientId,clientSecret,useremail, userpwd, new NextAction() {
+                public void run(String res) {
+                    if (res==null) {
+                        message("Error at login ?");
+                        stopWaitingWindow();
+                        return;
+                    }
+                    try {
+                        JSONObject json = new JSONObject(res);
+                        Log.d("afterLogin",json.toString());
+                        access_token = json.getString("access_token");
+                        if (access_token!=null) {
+                            System.out.println("AAAAAAAAAAAAccess "+access_token);
+                            message("Login OK");
+                            MouseApp.main.userLogged=true;
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        message("error when login");
+                        MouseApp.main.userLogged=false;
+                    } finally {
+                        stopWaitingWindow();
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -168,7 +283,7 @@ public class MouseApp extends Activity
             if (detectlang) filterlang(); else filterlangs=null;
 			return true;
 		case R.id.reset:
-			resetClient();
+			serverStage0();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -197,30 +312,6 @@ public class MouseApp extends Activity
 
     }
 
-    private void resetClient() {
-        startWaitingWindow("Trying to connect...");
-        connect.registerApp(new NextAction() {
-            public void run(String res) {
-                try {
-                    JSONObject json = new JSONObject(res);
-                    Log.d("afterRegApp",json.toString());
-                    String clientId = json.getString("client_id");
-                    String clientSecret = json.getString("client_secret");
-                    SharedPreferences.Editor edit = pref.edit();
-                    edit.putString(String.format("client_id_for_%s", instanceDomain), clientId);
-                    edit.putString(String.format("client_secret_for_%s", instanceDomain), clientSecret);
-                    edit.commit();
-                    stopWaitingWindow();
-                    userlogin();
-                } catch (JSONException e) {
-                    stopWaitingWindow();
-                    message("error when connecting");
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
     public void closeOnetoot(View v) {
         VisuToot.close();
         updateList();
@@ -232,18 +323,28 @@ public class MouseApp extends Activity
         unboost();
     }
     public void publicTL(View v) {
-        getToots("timelines/public");
+        if (connect!=null&&userLogged)
+            getToots("timelines/public");
+        else message("not connected");
     }
     public void homeTL(View v) {
-        getToots("timelines/home");
+        if (connect!=null&&userLogged)
+            getToots("timelines/home");
+        else message("not connected");
     }
     public void noteTL(View v) {
-        getNotifs("notifications");
+        if (connect!=null&&userLogged)
+            getNotifs("notifications");
+        else message("not connected");
     }
     public void reply(View v) {
         writeToot(null);
     }
     public void writeToot(View v) {
+        if (connect==null||!userLogged) {
+            message("not connected");
+            return;
+        }
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -263,73 +364,6 @@ public class MouseApp extends Activity
         });
     }
     public void quit(View v) {
-    }
-    public void resetApp(View v) {
-        resetClient();
-    }
-    public void detconnect(View v) {
-        clientId = pref.getString(String.format("client_id_for_%s", instanceDomain), null);
-        clientSecret = pref.getString(String.format("client_secret_for_%s", instanceDomain), null);
-        Log.d("LoginTask", "client id saved: " + clientId);
-        Log.d("LoginTask", "client secret saved: " + clientSecret);
-        if(clientId == null || clientSecret == null) {
-            resetClient();
-        } else {
-            userlogin();
-        }
-    }
-
-    void askPwd() {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-                UserInput.show(main, new NextAction() {
-                    public void run(String res) {
-                        String[] ss = res.split(" ");
-                        if (ss.length==2) {
-                            useremail=ss[0];
-                            userpwd=ss[1];
-                            SharedPreferences.Editor edit = pref.edit();
-                            edit.putString(String.format("user_for_%s", instanceDomain), useremail);
-                            edit.putString(String.format("pswd_for_%s", instanceDomain), userpwd);
-                            edit.commit();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    void userlogin() {
-        useremail = pref.getString(String.format("user_for_%s", instanceDomain), null);
-        userpwd   = pref.getString(String.format("pswd_for_%s", instanceDomain), null);
-        if(useremail == null || userpwd == null) {
-            askPwd();
-        } else {
-            startWaitingWindow("Trying to login...");
-            connect.userLogin(clientId,clientSecret,useremail, userpwd, new NextAction() {
-                public void run(String res) {
-                    if (res==null) {
-                        stopWaitingWindow();
-                        return;
-                    }
-                    try {
-                        JSONObject json = new JSONObject(res);
-                        Log.d("afterLogin",json.toString());
-                        access_token = json.getString("access_token");
-                        if (access_token!=null) {
-                            System.out.println("AAAAAAAAAAAAccess "+access_token);
-                            message("Login OK");
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        message("error when login");
-                    } finally {
-                        stopWaitingWindow();
-                    }
-                }
-            });
-        }
     }
 
     private NextAction torun = null;

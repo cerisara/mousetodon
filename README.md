@@ -2,7 +2,7 @@
 ![Mousetodon](./mousetodon.jpg)
 
 This is an application for reading Mastodon toots.
-It is in early development stage for now.
+It is in development stage for now.
 
 Its current features are:
 
@@ -12,15 +12,13 @@ Its current features are:
 Note that this requires *a lot of RAM*: if the app crashes when you activate this function, you don't have enough RAM and you cannot
 use it. But I plan in the near future to implement a lightweight version of this function.
 
-Target features I would like to implement:
+Target features I plan to implement:
 
 - Search in toots
-- Show public timelines of any instance without account
-- Write toots, reply, boost, unboost
 - Switch between several accounts easily
 - Various language advanced features (words clouds, clustering...) (I'm an NLP researcher after all !)
 
-Current limitations: (which make it really beta for now; gonna implement them asap)
+Current limitations:
 
 - Does not show images / videos
 - Does not show reply-history of toots

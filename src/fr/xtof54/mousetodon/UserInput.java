@@ -26,12 +26,14 @@ public class UserInput {
         dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
                         TextView txt = (TextView)dialogview.findViewById(R.id.login);
                         String u = txt.getText().toString(); 
                         txt = (TextView)dialogview.findViewById(R.id.pwd);
                         String p = txt.getText().toString();
-                        next.run(u+" "+p);
+                        txt = (TextView)dialogview.findViewById(R.id.instance);
+                        String i = txt.getText().toString();
+                        dialog.dismiss();
+                        next.run(u+" "+p+" "+i);
                     }
                 });
         dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"Cancel",
