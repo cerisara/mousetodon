@@ -1,3 +1,5 @@
+[](mousetodon.jpg)
+
 This is an application for reading Mastodon toots.
 It is in early development stage for now.
 
@@ -13,13 +15,14 @@ Target features I would like to implement:
 
 - Search in toots
 - Show public timelines of any instance without account
+- Write toots
 - Switch between several accounts easily
 - Various language advanced features (words clouds, clustering...) (I'm an NLP researcher after all !)
 
 Current limitations: (which make it really beta for now; gonna implement them asap)
 
 - Does not show images / videos
-- Does not allow to write a toot, reply, reblog nor favorize
+- Does not allow to reply, reblog nor favorize (not yet, in progress...)
 
 -----------
 
@@ -36,6 +39,9 @@ I actually don't like a few of Tusky features:
 
 - Tusky relies on Google Firebase: this makes the app heavy to build, incompatible with old devices,
 dependent on Google play services, and your data is not totally in your control.
+From firebase site: "[Firebase] helps you quickly [...] earn more money.", 
+"At the heart of Firebase is Firebase Analytics",
+"Earn money by displaying engaging ads"... Is it really FOSS ?
 - Tusky connects to a special server to allow for two-factor authentification; I consider it is a potential threat
 for privacy, and the app will not work whenever this additional server is down or attacked.
 So I really prefer to use simple login/password authentification, which also looks to work on all Mastodon instances afaik.

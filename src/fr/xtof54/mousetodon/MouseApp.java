@@ -64,7 +64,13 @@ public class MouseApp extends Activity
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        // TODO
+                        final int idx = position;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                VisuToot.show(idx);
+                            }
+                        });
                     }
                 });
 
@@ -213,6 +219,11 @@ public class MouseApp extends Activity
         });
     }
 
+    public void closeOnetoot(View v) {
+        VisuToot.close();
+    }
+    public void reply(View v) {
+    }
     public void publicTL(View v) {
         getToots("timelines/public");
     }
