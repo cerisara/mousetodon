@@ -21,8 +21,9 @@ public class DetToot {
     ArrayList<String> medias = new ArrayList<String>();
 
     public DetToot(JSONObject json, boolean detectlang) {
-        String texte = getText(json);
+        // MUST get extra info before text because of media list
         getExtraInfos(json);
+        String texte = getText(json);
         try {
             if (!json.isNull("reblog")) {
                 JSONObject reblog = json.getJSONObject("reblog");
@@ -70,6 +71,10 @@ public class DetToot {
                 usericon = DetIcons.downloadImg(acc);
             }
             String txt=json.getString("content");
+            // look for URLs
+            String[] words = txt.split(" ");
+            for (String w : words)
+                if (w.startsWith("href=")) medias.add(w.substring(6,w.length()-1));
             return aut+txt.trim();
         } catch (Exception e) {
             e.printStackTrace();

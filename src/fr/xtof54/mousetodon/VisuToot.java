@@ -1,5 +1,6 @@
 package fr.xtof54.mousetodon;
 
+import android.net.Uri;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ImageView;
@@ -13,6 +14,7 @@ import android.widget.Button;
 import android.widget.ArrayAdapter;
 import java.util.ArrayList;
 import android.graphics.Bitmap;
+import android.content.Intent;
 
 public class VisuToot {
 	static AlertDialog dialog=null;
@@ -24,7 +26,7 @@ public class VisuToot {
             dialog=null;
         }
     }
-    public static void show(int position) {
+    public static void show(final int position) {
         Activity main = MouseApp.main;
 
         LayoutInflater inflater = LayoutInflater.from(main);
@@ -49,8 +51,14 @@ public class VisuToot {
                     list.setAdapter(adapt);
                     list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            // TODO
+                        public void onItemClick(AdapterView<?> parent, View view, int medpos, long id) {
+                            String surl = MouseApp.main.toots.get(position).medias.get(medpos);
+                            if (!surl.startsWith("http")) MouseApp.main.message("not http: unsupported");
+                            else {
+                                Uri uri = Uri.parse(surl);
+                                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                MouseApp.main.startActivity(intent);
+                            }
                         }
                     });
                 } 
