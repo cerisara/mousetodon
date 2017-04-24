@@ -35,6 +35,8 @@ public class MouseApp extends Activity
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
     String[] filterlangs = null;
 
+    ArrayList<String> allinstances=new ArrayList<String>();
+    int curAccount=0;
     String instanceDomain = "";
     Connect connect=null;
 
@@ -90,6 +92,12 @@ public class MouseApp extends Activity
 
     public void serverStage0() {
         // check if we know the instance
+        String s = pref.getString("mouseapp_insts", null);
+        if (s!=null) {
+            String[] ss = s.split(" ");
+            allinstances.clear();
+            for (String x: ss) allinstances.add(x);
+        }
         instanceDomain = pref.getString("mouseapp_inst0", null);
         if (instanceDomain==null) {
             runOnUiThread(new Runnable() {
@@ -107,6 +115,11 @@ public class MouseApp extends Activity
                                 else {
                                     SharedPreferences.Editor edit = pref.edit();
                                     edit.putString("mouseapp_inst0", instanceDomain);
+                                    MouseApp.main.allinstances.add(instanceDomain);
+                                    String s = "";
+                                    for (String iss: MouseApp.main.allinstances) s+=iss+" ";
+                                    s=s.trim();
+                                    edit.putString("mouseapp_insts", s);
                                     edit.putString(String.format("user_for_%s", instanceDomain), useremail);
                                     edit.putString(String.format("pswd_for_%s", instanceDomain), userpwd);
                                     edit.commit();
@@ -118,6 +131,13 @@ public class MouseApp extends Activity
                 }
             });
         } else {
+            if (s==null) {
+                // bugfix: to remove
+                SharedPreferences.Editor edit = pref.edit();
+                edit.putString("mouseapp_insts", instanceDomain);
+                edit.commit();
+                allinstances.add(instanceDomain);
+            }
             serverStage1();
         }
     }
@@ -282,6 +302,9 @@ public class MouseApp extends Activity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.otherCreds:
+            addAccount();
+			return true;
 		case R.id.quit:
 			return true;
 		case R.id.nolang:
@@ -295,6 +318,18 @@ public class MouseApp extends Activity
 			return super.onOptionsItemSelected(item);
 		}
 	}
+
+    void addAccount() {
+        if (instanceDomain==null) {
+            message("Must have a first instance");
+            return;
+        }
+        SharedPreferences.Editor edit = pref.edit();
+        edit.putString("mouseapp_inst0", null);
+        edit.commit();
+        curAccount++;
+        serverStage0();
+    }
 
     void filterlang() {
         String langs = pref.getString(String.format("langs_for_%s", instanceDomain), null);
@@ -347,7 +382,14 @@ public class MouseApp extends Activity
     public void unboost(View v) {
         unboost();
     }
+    private void checkInstance() {
+        if (instanceDomain==null && allinstances.size()>0) {
+            instanceDomain=allinstances.get(0);
+            message("instance: "+instanceDomain);
+        }
+    }
     public void publicTL(View v) {
+        checkInstance();
         lastTL=2;
         maxid=-1;
         if (connect!=null&&userLogged)
@@ -355,6 +397,7 @@ public class MouseApp extends Activity
         else message("not connected");
     }
     public void homeTL(View v) {
+        checkInstance();
         lastTL=0;
         maxid=-1;
         if (connect!=null&&userLogged)
@@ -362,6 +405,7 @@ public class MouseApp extends Activity
         else message("not connected");
     }
     public void noteTL(View v) {
+        checkInstance();
         lastTL=1;
         maxid=-1;
         if (connect!=null&&userLogged)
@@ -395,6 +439,14 @@ public class MouseApp extends Activity
         });
     }
     public void quit(View v) {
+    }
+    public void nextAccount(View v) {
+        if (++curAccount>=allinstances.size()) curAccount=0;
+        SharedPreferences.Editor edit = pref.edit();
+        edit.putString("mouseapp_inst0", allinstances.get(curAccount));
+        edit.commit();
+        message("instance: "+allinstances.get(curAccount));
+        serverStage0();
     }
 
     private NextAction torun = null;
