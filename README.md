@@ -58,9 +58,9 @@ are in git.
 You just need the Java JDK, an Android SDK and the good old ANT build system (which I will soon complement
 by a simple script).
 
-After cloning, you can thus just type:
+After cloning, you should fix the file *local.properties* and just type:
 ```
-ant debug
+ant -f makeitlocal.xml debug
 ```
 and it should create the apk straight away.
 
