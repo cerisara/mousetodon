@@ -15,7 +15,7 @@ public class DetToot {
     static LangDetect langdetect = null;
     static boolean langdetectpossible = true;
     String txt, lang=null;
-    public int id=-1;
+    public int id=-1, parentid=-1;
     public boolean boosted = false;
     private Bitmap usericon=null;
     public String date="";
@@ -48,6 +48,8 @@ public class DetToot {
                 id = json.getInt("id");
 
                 if (!json.isNull("created_at")) date=json.getString("created_at");
+
+                if (!json.isNull("in_reply_to_id")) parentid=json.getInt("in_reply_to_id");
 
                 if (json.isNull("favourited")) boosted=false;
                 else boosted = json.getBoolean("favourited");
@@ -108,9 +110,14 @@ public class DetToot {
     public String getStr() {
         String s=""+txt;
         if (lang!=null) s+=" ("+lang+")";
-        if (boosted) s="* "+s;
-        if (medias.size()>0) s="MED "+s;
-        if (date.length()>0) s=date+" "+s;
+
+        String attrs="";
+        if (boosted) attrs+="♡";
+        if (medias.size()>0) attrs+="♭";
+        if (parentid>=0) attrs+="↑";
+
+        if (attrs.length()>0) attrs+=" ";
+        if (date.length()>0) s=attrs+date+" "+s;
         return s;
     }
 }

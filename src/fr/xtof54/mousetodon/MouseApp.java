@@ -33,6 +33,7 @@ public class MouseApp extends Activity
     public int lastTL=-1;
 
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
+    ArrayList<DetToot> savetoots = new ArrayList<DetToot>();
     String[] filterlangs = null;
 
     ArrayList<String> allinstances=new ArrayList<String>();
@@ -260,7 +261,7 @@ public class MouseApp extends Activity
 			@Override
 			public void run() {
                 if (waitwin==null) {
-                    waitwin=ProgressDialog.show(MouseApp.main,"Network operation...",s);
+                    waitwin=ProgressDialog.show(MouseApp.main,"Connect "+instanceDomain+"...",s);
                 }
             }
         });
@@ -372,6 +373,12 @@ public class MouseApp extends Activity
         else message("not connected");
     }
 
+    private void checkInstance() {
+        if (instanceDomain==null && allinstances.size()>0) {
+            instanceDomain=allinstances.get(0);
+            message("instance: "+instanceDomain);
+        }
+    }
     public void closeOnetoot(View v) {
         VisuToot.close();
         updateList();
@@ -382,11 +389,8 @@ public class MouseApp extends Activity
     public void unboost(View v) {
         unboost();
     }
-    private void checkInstance() {
-        if (instanceDomain==null && allinstances.size()>0) {
-            instanceDomain=allinstances.get(0);
-            message("instance: "+instanceDomain);
-        }
+    public void replyhist(View v) {
+        showReplyHistory();
     }
     public void publicTL(View v) {
         checkInstance();
@@ -611,5 +615,59 @@ public class MouseApp extends Activity
                 }
             }
         });
+    }
+
+    private DetToot downloadOneToot(final int id) {
+        String res = connect.getSyncToot(id);
+        if (res==null) {
+            message("error getting toot");
+            return null;
+        }
+        try {
+            JSONObject o = new JSONObject(res);
+            DetToot dt = new DetToot(o,false);
+            return dt;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    void showReplyHistory() {
+        if (curtootidx<0||curtootidx>=toots.size()) {
+            message("no initial toot");
+            return;
+        }
+        final DetToot tt = toots.get(curtootidx);
+        if (tt.id<0) {
+            message("no initial toot");
+            return;
+        }
+        // y a-t-il des toots parents ?
+        if (tt.parentid<0) {
+            message("no parent toot");
+            return;
+        }
+        Thread histthread = new Thread(new Runnable() {
+            public void run() {
+                int toot2download = tt.parentid;
+                savetoots.clear();
+                for (DetToot t : toots) savetoots.add(t);
+                toots.clear();
+                toots.add(tt);
+                startWaitingWindow("Getting toot... "+Integer.toString(toot2download));
+                for (int i=0;i<20;i++) {
+                    DetToot ttt = downloadOneToot(toot2download);
+                    if (i==0) stopWaitingWindow();
+                    if (ttt==null) break;
+                    toots.add(0,ttt);
+                    if (i==0) VisuToot.close();
+                    updateList();
+                    toot2download = ttt.parentid;
+                    if (toot2download<0) break;
+                }
+            }
+        });
+        histthread.start();
     }
 }

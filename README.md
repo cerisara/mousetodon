@@ -9,7 +9,7 @@ but it has other advantages depicted below.
 Its most noticeable features, which makes it different from the other apps, are:
 
 - **langage detection** and filtering: you may define one or several languages, and only the toots from these languages will be shown
-Note that this requires *a lot of RAM*: if the app crashes when you activate this function, you certainly don't have enough RAM and you cannot
+Note that this requires *a lot of RAM*: if the app crashes when you activate this function, you may not have enough RAM and you cannot
 use it. But I plan in the near future to implement a lightweight version of this function.
 - **multiple accounts/instances** support, with fast switching between them with one-click.
 - Open-source and as independent from proprietary 3rd-party libraries (e.g., Google ones) as possible.
@@ -21,7 +21,6 @@ Target features not implement yet:
 
 Current limitations:
 
-- Does not show reply-history of toots
 - Does not show user details
 - Does not allow (yet) to reblog (in progress... but you can boost !)
 - Does not support content warnings, nor media uploads

@@ -89,6 +89,30 @@ public class Connect {
         Object[] args = {surl, params, next};
         new GetTask().execute(args);
     }
+    public String getSyncToot(final int id) {
+        String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id), domain);
+        try {
+            URL url = new URL(surl);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("Authorization", "Bearer "+MouseApp.access_token);
+            urlConnection.connect();
+            int rep = urlConnection.getResponseCode();
+            BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+
+            while((line = br.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+            br.close();
+            String res=sb.toString();
+            urlConnection.disconnect();
+            return res;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     public String blockGetTL(final String tl) {
         List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
         String surl = String.format("https://%s/api/v1/"+tl, domain);
