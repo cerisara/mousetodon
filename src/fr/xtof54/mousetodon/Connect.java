@@ -219,12 +219,14 @@ public class Connect {
                 URL url = new URL(surl);
                 System.out.println("mousetodon trying connecttask "+surl);
 
+                /*
                 SSLContext sslcontext = SSLContext.getInstance("TLSv1");
                 sslcontext.init(null, null, null);
                 SSLSocketFactory NoSSLv3Factory = new NoSSLv3SocketFactory(sslcontext.getSocketFactory());
                 HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
+                */
 
-                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 System.out.println("mousetodon connecttask ok");
                 urlConnection.setRequestMethod("POST");
                 OutputStream os = urlConnection.getOutputStream();
