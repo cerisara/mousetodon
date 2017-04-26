@@ -19,6 +19,9 @@ import android.util.Log;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.HttpURLConnection;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import java.net.MalformedURLException;
 
 public class Connect {
@@ -214,9 +217,18 @@ public class Connect {
             String res=null;
             try {
                 URL url = new URL(surl);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                System.out.println("mousetodon trying connecttask "+surl);
+
+                SSLContext sslcontext = SSLContext.getInstance("TLSv1");
+                sslcontext.init(null, null, null);
+                SSLSocketFactory NoSSLv3Factory = new NoSSLv3SocketFactory(sslcontext.getSocketFactory());
+                HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
+
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                System.out.println("mousetodon connecttask ok");
                 urlConnection.setRequestMethod("POST");
                 OutputStream os = urlConnection.getOutputStream();
+                System.out.println("mousetodon connecttask ok2");
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
                 String ssq = getQuery(params);
                 System.out.println("DEBUGSSSSSSS "+ssq);
@@ -238,9 +250,7 @@ public class Connect {
                 br.close();
                 res=sb.toString();
                 urlConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return res;

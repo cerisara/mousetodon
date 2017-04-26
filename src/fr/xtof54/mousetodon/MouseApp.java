@@ -43,7 +43,6 @@ public class MouseApp extends Activity
 
     String clientId=null, clientSecret=null;
     String useremail=null, userpwd=null;
-    String atoken = null, rtoken = null;
     // static BasicCookieStore mycookiestore = new BasicCookieStore();
 
     SharedPreferences pref;
@@ -154,22 +153,25 @@ public class MouseApp extends Activity
                 public void run(String res) {
                     boolean goon=false;
                     try {
-                        JSONObject json = new JSONObject(res);
-                        if (json!=null) {
-                            Log.d("afterRegApp",json.toString());
-                            String clientId = json.getString("client_id");
-                            String clientSecret = json.getString("client_secret");
-                            if (clientId!=null&&clientSecret!=null) {
-                                SharedPreferences.Editor edit = pref.edit();
-                                edit.putString(String.format("client_id_for_%s", instanceDomain), clientId);
-                                edit.putString(String.format("client_secret_for_%s", instanceDomain), clientSecret);
-                                edit.commit();
-                                MouseApp.main.appRegistered=true;
-                                message("App registered on "+instanceDomain);
-                                // everytime we register a new app, we automatically login the user
-                                goon=true;
-                            } else message("Problem client registration");
-                        } else message("Problem client json registration");
+                        if (res==null) message("ERROR instance");
+                        else {
+                            JSONObject json = new JSONObject(res);
+                            if (json!=null) {
+                                Log.d("afterRegApp",json.toString());
+                                String clientId = json.getString("client_id");
+                                String clientSecret = json.getString("client_secret");
+                                if (clientId!=null&&clientSecret!=null) {
+                                    SharedPreferences.Editor edit = pref.edit();
+                                    edit.putString(String.format("client_id_for_%s", instanceDomain), clientId);
+                                    edit.putString(String.format("client_secret_for_%s", instanceDomain), clientSecret);
+                                    edit.commit();
+                                    MouseApp.main.appRegistered=true;
+                                    message("App registered on "+instanceDomain);
+                                    // everytime we register a new app, we automatically login the user
+                                    goon=true;
+                                } else message("Problem client registration");
+                            } else message("Problem client json registration");
+                        }
                     } catch (JSONException e) {
                         MouseApp.main.appRegistered=false;
                         message("error when registrating");
@@ -306,7 +308,8 @@ public class MouseApp extends Activity
 		case R.id.otherCreds:
             addAccount();
 			return true;
-		case R.id.quit:
+		case R.id.delinst:
+            delInstance();
 			return true;
 		case R.id.nolang:
             detectlang=!detectlang;
@@ -320,13 +323,52 @@ public class MouseApp extends Activity
 		}
 	}
 
+    void delInstance() {
+        if (instanceDomain==null) {
+            message("ERROR: no instance ?");
+            return;
+        }
+        if (pref==null) {
+            message("ERROR: no prefs ?");
+            return;
+        }
+        int i=-1;
+        for (i=0;i<allinstances.size();i++) {
+            if (allinstances.get(i).equals(instanceDomain)) break;
+        }
+        if (i<0) message("instance "+instanceDomain+" not found");
+        else {
+            allinstances.remove(i);
+            SharedPreferences.Editor edit = pref.edit();
+            edit.remove(String.format("user_for_%s", instanceDomain));
+            edit.remove(String.format("pswd_for_%s", instanceDomain));
+            edit.remove(String.format("client_id_for_%s", instanceDomain));
+            edit.remove(String.format("client_secret_for_%s", instanceDomain));
+            edit.remove(String.format("langs_for_%s", instanceDomain));
+            edit.remove("mouseapp_inst0");
+            {
+                String s = "";
+                for (String iss: MouseApp.main.allinstances) s+=iss+" ";
+                s=s.trim();
+                edit.putString("mouseapp_insts", s);
+            }
+            edit.commit();
+            message("instance "+instanceDomain+" removed !");
+            clientId=null; clientSecret=null;
+            useremail=null; userpwd=null;
+            filterlangs=null;
+            instanceDomain="";
+            nextAccount(null);
+        }
+    }
+
     void addAccount() {
         if (instanceDomain==null) {
             message("Must have a first instance");
             return;
         }
         SharedPreferences.Editor edit = pref.edit();
-        edit.putString("mouseapp_inst0", null);
+        edit.remove("mouseapp_inst0");
         edit.commit();
         curAccount++;
         serverStage0();
@@ -447,9 +489,12 @@ public class MouseApp extends Activity
     public void nextAccount(View v) {
         if (++curAccount>=allinstances.size()) curAccount=0;
         SharedPreferences.Editor edit = pref.edit();
-        edit.putString("mouseapp_inst0", allinstances.get(curAccount));
+        if (allinstances.size()==0) edit.remove("mouseapp_inst0");
+        else {
+            edit.putString("mouseapp_inst0", allinstances.get(curAccount));
+            message("instance: "+allinstances.get(curAccount));
+        }
         edit.commit();
-        message("instance: "+allinstances.get(curAccount));
         serverStage0();
     }
 
