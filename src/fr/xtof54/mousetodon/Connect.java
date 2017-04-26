@@ -24,6 +24,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import java.net.MalformedURLException;
 
+import info.guardianproject.netcipher.client.StrongConnectionBuilder;
+import info.guardianproject.netcipher.client.StrongBuilder;
+
 public class Connect {
     String domain;
 
@@ -39,7 +42,8 @@ public class Connect {
         params.add(new Pair<String, String>("redirect_uris", "urn:ietf:wg:oauth:2.0:oob"));
         String surl = String.format("https://%s/api/v1/apps", domain);
         Object[] args = {surl, params, next};
-        new ConnectTask().execute(args);
+        postcipher(args);
+        // new ConnectTask().execute(args);
     }
 
     public void userLogin(String clientid, String secret, String email, String pwd, NextAction next) {
@@ -204,6 +208,64 @@ public class Connect {
         @Override
         protected void onPostExecute(String response) {
             if (next!=null) {next.run(response);}
+        }
+    }
+
+    private void postcipher(Object... args) {
+        String surl=(String)args[0];
+        final List<Pair<String, String>> params = (List<Pair<String, String>>)args[1];
+        final NextAction next=(NextAction)args[2];
+        try {
+            URL url = new URL(surl);
+            StrongConnectionBuilder cb = new StrongConnectionBuilder(MouseApp.main);
+            System.out.println("mousetodon connecttask ok0");
+            cb.connectTo(url);
+            System.out.println("mousetodon connecttask ok1");
+            cb.build(new StrongBuilder.Callback<HttpURLConnection>() {
+                public void onConnected(HttpURLConnection urlConnection) {
+                    try {
+                        urlConnection.setRequestMethod("POST");
+                        OutputStream os = urlConnection.getOutputStream();
+                        System.out.println("mousetodon connecttask ok2");
+                        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+                        String ssq = getQuery(params);
+                        System.out.println("DEBUGSSSSSSS "+ssq);
+                        writer.write(ssq);
+                        writer.flush();
+                        writer.close();
+                        os.close();
+
+                        urlConnection.connect();
+
+                        BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while((line = br.readLine()) != null) sb.append(line + "\n");
+                        br.close();
+                        String res=sb.toString();
+                        urlConnection.disconnect();
+                        next.run(res);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        next.run(null);
+                    }
+                }
+                public void onConnectionException(Exception e) {
+                    e.printStackTrace();
+                    MouseApp.main.message("ERROR netcipher");
+                    next.run(null);
+                }
+                public void onTimeout() {
+                    MouseApp.main.message("Timeout netcipher");
+                    next.run(null);
+                }
+                public void onInvalid() {
+                    MouseApp.main.message("Invalid netcipher");
+                    next.run(null);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
