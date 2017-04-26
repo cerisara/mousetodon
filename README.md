@@ -37,7 +37,7 @@ You then see 3 buttons on the top left, respectively for showing your notificati
 The 4th button allow you to toot a message, and the 5th button gives you the option to switch to the next known instance.
 Initially, you should only have defined a single instance, but you can later on easily add another one via the application menu (3 little dots at the bottom right on
 "old" Android devices), item "+Account".
-The two other items in the application menu are not fully functional for now and you don't need them.
+Another item in the application menu allows you to switch on and off language detection+filtering, and define the languages to show.
 
 Any timeline shows a list of toots, with a picture of the sender on the left, and some technical information on top
 (the date, whether you have boosted this toot (with a star), the sender name).
