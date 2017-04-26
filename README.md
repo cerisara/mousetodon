@@ -90,12 +90,12 @@ Because of these reasons, and also because Tusky do not implement some features 
 I've decided to implement my own android client for mastodon.
 The features that are not available on other apps and that I want to have are:
 
-- language detection: a first version is already up and running, but it consumes too much RAM, so I want
+- language detection: a first version is already up and running, but it consumes lots of RAM, so I plan
 to implement another lightweight version of it;
-- multiple logins: when you have several accounts on several instances, it is convenient to be able to quickly
+- multiple logins: when you have several accounts on several instances, you can quickly
 switch from one account to another;
-- support for older devices (well, apart from the language detection feature); I would like to make an app that works
-on an old 2.3.3 android;
+- support for older devices (well, assuming the language detection feature is off !); my app is designed to work
+on an old 2.3.3 android (and all more recent androids as well, of course);
 - very simple compilation process, as few external dependencies as possible. I must be able to compile it on an
-android smartphone (without any PC).
+android smartphone (without any PC: yes, it's possible !).
 
