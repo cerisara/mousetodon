@@ -93,8 +93,32 @@ The features that are not available on other apps and that I want to have are:
 to implement another lightweight version of it;
 - multiple logins: when you have several accounts on several instances, you can quickly
 switch from one account to another;
-- support for older devices (well, assuming the language detection feature is off !); my app is designed to work
+- support for older devices (well, assuming the language detection feature is off and SSL shaking is compatible - see below !); my app is designed to work
 on an old 2.3.3 android (and all more recent androids as well, of course);
 - very simple compilation process, as few external dependencies as possible. I must be able to compile it on an
 android smartphone (without any PC: yes, it's possible !).
+
+------------
+
+### A note on SLL handshake error
+
+It *may* be that connection to a Mastodon server just fails, and if you look at the android logs, you see
+an *SSL handshake error*. This is a known bug/incompatibility between some versions of Android and some
+configurations of some Mastodon server. This issue also affects all native Java android apps, in particular *Tusky*,
+but apparently it does not affect android clients that are not programmes in native java, such as TootyFruity.
+
+The problem is that secure connection with a Mastodon instance can be configured (at the instance level, so
+I don't see what can done in the app to fix that) with various TLS protocols, and that from one version to another,
+the core Android libraries implement in very different ways these protocols, and sometimes, it just does not work.
+
+So if this happens to you, what can you do ?
+So far, I see a few options available:
+
+- Change instance and try to find some instance that is compatible with your android version
+- Change your android device, or android version :-)
+- Use a non-native Mastodon client, such as TootyFruity
+- Wait for future TLS compatibility recommendations about Mastodon, which I beleive should be agreed upon in the near future,
+and given them to your instance owner so that he configures his instance accordingly.
+- Wait for future version of the Mastodon software, which hopefully will increase compatbility with stock Android.
+
 
