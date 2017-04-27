@@ -100,7 +100,7 @@ android smartphone (without any PC: yes, it's possible !).
 
 ------------
 
-### A note on SLL handshake error
+### A note on SSL handshake error
 
 It *may* be that connection to a Mastodon server just fails, and if you look at the android logs, you see
 an *SSL handshake error*. This is a known bug/incompatibility between some versions of Android and some
