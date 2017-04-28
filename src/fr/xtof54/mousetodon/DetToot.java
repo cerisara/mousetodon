@@ -2,9 +2,6 @@ package fr.xtof54.mousetodon;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.optimaize.langdetect.*;
-import com.optimaize.langdetect.profiles.*;
-import com.optimaize.langdetect.ngram.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -8,11 +8,11 @@ As compared to the other available android apps, Mousetodon is certainly not as 
 but it has other advantages depicted below.
 Its most noticeable features, which makes it different from the other apps, are:
 
-- **langage detection** and filtering: you may define one or several languages, and only the toots from these languages will be shown
-Note that this requires *a lot of RAM*: if the app crashes when you activate this function, you may not have enough RAM and you cannot
-use it. But I plan in the near future to implement a lightweight version of this function.
+- **langage detection** and filtering: you may define one or several languages, and only the toots from these languages will be shown.
+For now, only the following languages can be detected: French (fr), English (en), Spanish (sp), German (ge) and Japanese-Chinese-Korean (ja) (I know, sorry, these 3 languages are very different, but I'm no expert in them and I'll do my best to improve them in a later release, or
+hopefully before thanks to a merge request).
 - **multiple accounts/instances** support, with fast switching between them with one-click.
-- Open-source and as independent from proprietary 3rd-party libraries (e.g., Google ones) as possible.
+- Open-source and not dependent on any 3rd-party library, especially Google ones.
 
 Target features not implement yet:
 
@@ -36,7 +36,8 @@ You then see 3 buttons on the top left, respectively for showing your notificati
 The 4th button allow you to toot a message, and the 5th button gives you the option to switch to the next known instance.
 Initially, you should only have defined a single instance, but you can later on easily add another one via the application menu (3 little dots at the bottom right on
 "old" Android devices), item "+Account".
-Another item in the application menu allows you to switch on and off language detection+filtering, and define the languages to show.
+Another item in the application menu allows you to switch on and off language detection+filtering, and define the languages to show:
+use the two-letter codes (fr en sp ge ja) separated by whitespace.
 
 Any timeline shows a list of toots, with a picture of the sender on the left, and some technical information on top
 (the date, whether you have boosted this toot (with a star), the sender name).
@@ -52,10 +53,9 @@ This popup window also gives you the option to reply to this toot, boost or unbo
 
 Contrary to other apps, building Mousetodon is very simple, because my objective is to be able
 to build it even from within an android device itself !
-So you don't need heavy IDE like Virtual Studio, nor even internet connections, as the few dependencies
-are in git.
-You just need the Java JDK, an Android SDK and the good old ANT build system (which I will soon complement
-by a simple script).
+So you don't need heavy IDE like Virtual Studio, nor even internet connections, as there's no external dependencies.
+You just need the Java JDK, an Android SDK and the good old ANT build system.
+You will soon not need ANT any more as I plan to commit a shell compilation script.
 
 After cloning, you should fix the file *local.properties* and just type:
 ```
@@ -89,11 +89,10 @@ Because of these reasons, and also because Tusky do not implement some features 
 I've decided to implement my own android client for mastodon.
 The features that are not available on other apps and that I want to have are:
 
-- language detection: a first version is already up and running, but it consumes lots of RAM, so I plan
-to implement another lightweight version of it;
+- language detection: a first version is already up and running;
 - multiple logins: when you have several accounts on several instances, you can quickly
 switch from one account to another;
-- support for older devices (well, assuming the language detection feature is off and SSL shaking is compatible - see below !); my app is designed to work
+- support for older devices (well, assuming SSL shaking is compatible with Mastodon - see below !); my app is designed to work
 on an old 2.3.3 android (and all more recent androids as well, of course);
 - very simple compilation process, as few external dependencies as possible. I must be able to compile it on an
 android smartphone (without any PC: yes, it's possible !).
