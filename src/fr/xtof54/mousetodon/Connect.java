@@ -24,11 +24,24 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import java.net.MalformedURLException;
 
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
 public class Connect {
     String domain;
 
     public Connect(String instance) {
         domain=instance;
+        WebView wv = (WebView)MouseApp.main.findViewById(R.id.web1);
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.addJavascriptInterface(new MyJavaScriptInterface(), "INTERFACE"); 
+        wv.setWebViewClient(new WebViewClient() { 
+            @Override 
+            public void onPageFinished(WebView view, String url) { 
+                view.loadUrl("javascript:window.INTERFACE.processContent(document.getElementsByTagName('body')[0].innerText);"); 
+            } 
+        });
+        wv.loadUrl("javascript:document.content=\"testeradur\";");
     }
 
     public void registerApp(NextAction next) {
@@ -313,4 +326,14 @@ public class Connect {
 
 
 }
+
+class MyJavaScriptInterface { 
+    public MyJavaScriptInterface() {
+    }
+
+    @SuppressWarnings("unused") 
+    public void processContent(String aContent) { 
+        System.out.println("text read "+aContent);
+    } 
+} 
 
