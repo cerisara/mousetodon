@@ -65,6 +65,10 @@ public class DetToot {
         }
     }
 
+    public void setIcon(Bitmap img) {
+        usericon=img;
+    }
+
     String getText(JSONObject json) {
         if (json==null) return "";
         try {
@@ -72,7 +76,7 @@ public class DetToot {
             if (!json.isNull("account")) {
                 JSONObject acc = json.getJSONObject("account");
                 aut = acc.getString("username")+": ";
-                usericon = DetIcons.downloadImg(acc);
+                DetIcons.downloadImg(this,acc);
             }
             String txt=json.getString("content");
             // look for URLs

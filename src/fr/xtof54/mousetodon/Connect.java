@@ -30,28 +30,22 @@ import android.webkit.WebViewClient;
 
 public class Connect extends WebViewClient {
     String domain;
-    boolean itsmycall=false;
 
     public Connect() {
         super();
     }
 
+    // c'est un webview client qui repond uniquement au WebView dedie au javascript
     @Override 
     public void onPageFinished(WebView view0, String url) { 
         System.out.println("webviewpage finished "+url);
-        final WebView view = view0;
-        if (itsmycall) {
-            System.out.println("webviewpage mycall detected");
-            itsmycall=false;
-            return;
+        if (url.contains("javascript")) {
+            System.out.println("webviewpage javascriptcall detected");
+        } else {
+            // c'est un GET ou POST vers l'API du server mastodon
+            // je lance un appel JS pour recuperer le JSON en reponse
+            MouseApp.javascriptCmd("javascript:window.INTERFACE.processContent(document.getElementsByTagName('html')[0].innerHTML);");
         }
-        itsmycall=true;
-        MouseApp.main.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                view.loadUrl("javascript:window.INTERFACE.processContent(document.getElementsByTagName('html')[0].innerHTML);");
-            }
-        });
     } 
 
     /*
@@ -118,13 +112,8 @@ webView.loadData(data, "text/HTML", "UTF-8");
             "xhr.addEventListener('error', deterror); "+
             "xhr.send('client_name=Mousetodon&scopes=read+write+follow&redirect_uris=urn:ietf:wg:oauth:2.0:oob'); ";
         System.out.println("SENDJS "+js);
-        MouseApp.main.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                MouseApp.main.jsnext=next;
-                MouseApp.main.wv.loadUrl("javascript:"+js);
-            }
-        });
+        MouseApp.main.jsnext=next;
+        MouseApp.javascriptCmd("javascript:"+js);
     }
 
     public void userLogin(String clientid, String secret, String email, String pwd, final NextAction next) {
@@ -139,13 +128,8 @@ webView.loadData(data, "text/HTML", "UTF-8");
             "xhr.addEventListener('error', deterror); "+
             "xhr.send('client_id="+clientid+"&client_secret="+secret+"&grant_type=password&username="+email+"&password="+pwd+"&scope=read+write+follow'); ";
         System.out.println("SENDJS "+js);
-        MouseApp.main.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                MouseApp.main.jsnext=next;
-                MouseApp.main.wv.loadUrl("javascript:"+js);
-            }
-        });
+        MouseApp.main.jsnext=next;
+        MouseApp.javascriptCmd("javascript:"+js);
     }
 
     public void getTL(final String tl, final NextAction next) {
@@ -160,13 +144,8 @@ webView.loadData(data, "text/HTML", "UTF-8");
             "xhr.addEventListener('error', deterror); "+
             "xhr.send(null);";
         System.out.println("SENDJS "+js);
-        MouseApp.main.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                MouseApp.main.jsnext=next;
-                MouseApp.main.wv.loadUrl("javascript:"+js);
-            }
-        });
+        MouseApp.main.jsnext=next;
+        MouseApp.javascriptCmd("javascript:"+js);
     }
 
     public void sendToot(String s, NextAction next) {

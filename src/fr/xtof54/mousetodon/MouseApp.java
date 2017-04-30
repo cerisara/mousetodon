@@ -37,7 +37,8 @@ public class MouseApp extends Activity {
     ArrayList<DetToot> savetoots = new ArrayList<DetToot>();
     String[] filterlangs = null;
 
-    WebView wv;
+    private DetWebView wvimg;
+    private WebView wvjs;
 
     ArrayList<String> allinstances=new ArrayList<String>();
     int curAccount=0;
@@ -57,8 +58,7 @@ public class MouseApp extends Activity {
 
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MouseApp.main=this;
         setContentView(R.layout.main);
@@ -91,10 +91,11 @@ public class MouseApp extends Activity {
         imgsinrow.clear();
 
         connect = new Connect();
-        wv = (WebView)findViewById(R.id.web1);
-        wv.getSettings().setJavaScriptEnabled(true);
-        wv.setWebViewClient(connect);
-        wv.addJavascriptInterface(new MyJavaScriptInterface(), "INTERFACE"); 
+        wvimg = (DetWebView)findViewById(R.id.webimg);
+        wvjs = (WebView)findViewById(R.id.webjs);
+        wvjs.getSettings().setJavaScriptEnabled(true);
+        wvjs.setWebViewClient(connect);
+        wvjs.addJavascriptInterface(new MyJavaScriptInterface(), "INTERFACE"); 
 
         serverStage0();
     }
@@ -290,6 +291,7 @@ public class MouseApp extends Activity {
     }
 
     void updateList() {
+        System.out.println("UIUUUUUUUUUUUUUULLLL");
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -724,6 +726,30 @@ public class MouseApp extends Activity {
         });
         histthread.start();
     }
+
+    public static void imgurl(final String url) {
+        main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                main.wvimg.loadUrl(url);
+            }
+        });
+    }
+
+    public static void javascriptCmd(final String url) {
+        try {
+            System.out.println("JSSS url "+url);
+            main.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    main.wvjs.loadUrl(url);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public NextAction jsnext=null;
 }
 
