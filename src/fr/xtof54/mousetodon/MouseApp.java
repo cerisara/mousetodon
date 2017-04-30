@@ -19,9 +19,10 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.graphics.Bitmap;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
-public class MouseApp extends Activity
-{
+public class MouseApp extends Activity {
     public static MouseApp main=null;
     public static String access_token=null;
     public static String tmpfiledir=null;
@@ -35,6 +36,8 @@ public class MouseApp extends Activity
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
     ArrayList<DetToot> savetoots = new ArrayList<DetToot>();
     String[] filterlangs = null;
+
+    WebView wv;
 
     ArrayList<String> allinstances=new ArrayList<String>();
     int curAccount=0;
@@ -86,6 +89,15 @@ public class MouseApp extends Activity
         tmpfiledir=mouseappdir.getAbsolutePath();
         Log.d("CACHEDIR",tmpfiledir);
         imgsinrow.clear();
+
+        connect = new Connect();
+        wv = (WebView)findViewById(R.id.web1);
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.setWebViewClient(connect);
+        wv.addJavascriptInterface(new MyJavaScriptInterface(), "INTERFACE"); 
+        System.out.println("loadURL______________________________");
+        wv.loadUrl("http://talc1.loria.fr/users/cerisara/");
+        wv.invalidate();
 
         serverStage0();
     }
@@ -143,7 +155,7 @@ public class MouseApp extends Activity
     }
     public void serverStage1() {
         // check if the app is registered
-        connect = new Connect(instanceDomain);
+        connect.setInstance(instanceDomain);
         clientId = pref.getString(String.format("client_id_for_%s", instanceDomain), null);
         clientSecret = pref.getString(String.format("client_secret_for_%s", instanceDomain), null);
         if (clientId==null||clientSecret==null) {
@@ -716,3 +728,14 @@ public class MouseApp extends Activity
         histthread.start();
     }
 }
+
+class MyJavaScriptInterface {
+    public MyJavaScriptInterface() {
+    }
+
+    @SuppressWarnings("unused")
+    public void processContent(String aContent) {
+        System.out.println("texttread "+aContent);
+    }
+}
+

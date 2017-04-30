@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import android.graphics.Bitmap;
 
 import android.util.Pair;
 import android.os.AsyncTask;
@@ -27,21 +28,94 @@ import java.net.MalformedURLException;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-public class Connect {
+public class Connect extends WebViewClient {
     String domain;
+    boolean itsmycall=false;
 
-    public Connect(String instance) {
-        domain=instance;
-        WebView wv = (WebView)MouseApp.main.findViewById(R.id.web1);
-        wv.getSettings().setJavaScriptEnabled(true);
-        wv.addJavascriptInterface(new MyJavaScriptInterface(), "INTERFACE"); 
-        wv.setWebViewClient(new WebViewClient() { 
-            @Override 
-            public void onPageFinished(WebView view, String url) { 
-                view.loadUrl("javascript:window.INTERFACE.processContent(document.getElementsByTagName('body')[0].innerText);"); 
-            } 
+    public Connect() {
+        super();
+    }
+
+    @Override 
+    public void onPageFinished(WebView view0, String url) { 
+        System.out.println("webviewpage finished "+url);
+        final WebView view = view0;
+        if (itsmycall) {
+            System.out.println("webviewpage mycall detected");
+            itsmycall=false;
+            return;
+        }
+        itsmycall=true;
+        MouseApp.main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                view.loadUrl("javascript:window.INTERFACE.processContent(document.getElementsByTagName('html')[0].innerHTML);");
+            }
         });
-        wv.loadUrl("javascript:document.content=\"testeradur\";");
+    } 
+
+    /*
+  There are several ways to set content for WebView:
+WebView webView = (WebView) findViewById(R.id.WebView);
+// Ex 1: set URL address:
+webView.loadUrl("https://www.android.com/");
+// Ex 2: set .html from a raw folder:
+webView.loadUrl("file:///Android_res/raw/some_file.HTML");
+// Ex 3: set .html from an asset folder:
+webView.loadUrl("file:///Android_asset/some_file.HTML");
+// Ex 4: set html content as String:
+String rawHTML = "<HTML>"+ "<body><h1>HTML content</h1></body>"+ "</HTML>";
+webView.loadData(data, "text/HTML", "UTF-8");
+*/
+
+    /* celle-ci est appelee avant que la page ne se charge
+     
+    @Override 
+    public void onPageStarted(WebView view0, String url, Bitmap favicon) { 
+        final WebView view = view0;
+        System.out.println("webviewpage started "+url);
+        MouseApp.main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                view.loadUrl("javascript:window.INTERFACE.processContent(document.getElementsByTagName('html')[0].innerHTML);");
+                // view.loadUrl("javascript:window.INTERFACE.processContent(document.content);"); 
+            }
+        });
+        //view.loadUrl("javascript:window.INTERFACE.processContent(document.getElementsByTagName('body')[0].innerText);"); 
+    } 
+    */
+
+
+    /* celle-ci n'est jamais appelee ??
+
+    @Override 
+    public boolean shouldOverrideUrlLoading(WebView view0, String url) { 
+        final WebView view = view0;
+        System.out.println("webviewpage urlloading "+url);
+        MouseApp.main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                view.loadUrl("javascript:window.INTERFACE.processContent(document.getElementsByTagName('html')[0].innerHTML);");
+            }
+        });
+        return false;
+    } 
+    */
+
+    /*
+    @Override 
+    public void onProgressChanged() {
+    }
+    */
+
+    /*
+    @Override 
+    public void onPageLoad() {
+    }
+    */
+
+    public void setInstance(String in) {
+        domain=""+in;
     }
 
     public void registerApp(NextAction next) {
@@ -323,17 +397,6 @@ public class Connect {
             if (next!=null) {next.run(response);}
         }
     }
-
-
 }
 
-class MyJavaScriptInterface { 
-    public MyJavaScriptInterface() {
-    }
-
-    @SuppressWarnings("unused") 
-    public void processContent(String aContent) { 
-        System.out.println("text read "+aContent);
-    } 
-} 
 
