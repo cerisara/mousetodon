@@ -118,15 +118,25 @@ webView.loadData(data, "text/HTML", "UTF-8");
         domain=""+in;
     }
 
-    public void registerApp(NextAction next) {
+    public void registerApp(final NextAction next) {
         Log.d("Connect","register app");
-        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
-        params.add(new Pair<String, String>("client_name", "Mousetodon"));
-        params.add(new Pair<String, String>("scopes", "read write follow"));
-        params.add(new Pair<String, String>("redirect_uris", "urn:ietf:wg:oauth:2.0:oob"));
+
         String surl = String.format("https://%s/api/v1/apps", domain);
-        Object[] args = {surl, params, next};
-        new ConnectTask().execute(args);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send('client_name=Mousetodon&scopes=read+write+follow&redirect_uris=urn:ietf:wg:oauth:2.0:oob'); ";
+        System.out.println("SENDJS "+js);
+        MouseApp.main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                MouseApp.main.jsnext=next;
+                MouseApp.main.wv.loadUrl("javascript:"+js);
+            }
+        });
     }
 
     public void userLogin(String clientid, String secret, String email, String pwd, NextAction next) {

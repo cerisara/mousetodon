@@ -95,9 +95,6 @@ public class MouseApp extends Activity {
         wv.getSettings().setJavaScriptEnabled(true);
         wv.setWebViewClient(connect);
         wv.addJavascriptInterface(new MyJavaScriptInterface(), "INTERFACE"); 
-        System.out.println("loadURL______________________________");
-        wv.loadUrl("http://talc1.loria.fr/users/cerisara/");
-        wv.invalidate();
 
         serverStage0();
     }
@@ -727,6 +724,7 @@ public class MouseApp extends Activity {
         });
         histthread.start();
     }
+    public NextAction jsnext=null;
 }
 
 class MyJavaScriptInterface {
@@ -736,6 +734,17 @@ class MyJavaScriptInterface {
     @SuppressWarnings("unused")
     public void processContent(String aContent) {
         System.out.println("texttread "+aContent);
+        if (aContent.startsWith("DETOK")) {
+            aContent=aContent.substring(5);
+            MouseApp.main.message("connect OK");
+        } else if (aContent.startsWith("DETKO")) {
+            MouseApp.main.message("error connect");
+        }
+        if (MouseApp.main.jsnext!=null) {
+            NextAction a=MouseApp.main.jsnext;
+            MouseApp.main.jsnext=null;
+            a.run(aContent);
+        }
     }
 }
 

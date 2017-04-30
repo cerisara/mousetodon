@@ -53,7 +53,7 @@
 <WebView 
         android:id="@+id/web1"
         android:layout_width="match_parent"
-        android:layout_height="25pt"
+        android:layout_height="5pt"
         android:isScrollContainer="false" />
 
 </LinearLayout>
