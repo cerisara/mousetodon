@@ -735,8 +735,10 @@ class MyJavaScriptInterface {
     public void processContent(String aContent) {
         System.out.println("texttread "+aContent);
         if (aContent.startsWith("DETOK")) {
-            aContent=aContent.substring(5);
-            MouseApp.main.message("connect OK");
+            aContent=aContent.substring(5).trim();
+            if (aContent.startsWith("{\"error\":")) {
+                MouseApp.main.message("error:"+aContent.substring(10));
+            } else MouseApp.main.message("connect OK");
         } else if (aContent.startsWith("DETKO")) {
             MouseApp.main.message("error connect");
         }

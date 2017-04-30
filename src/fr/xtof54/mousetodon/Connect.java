@@ -102,18 +102,6 @@ webView.loadData(data, "text/HTML", "UTF-8");
     } 
     */
 
-    /*
-    @Override 
-    public void onProgressChanged() {
-    }
-    */
-
-    /*
-    @Override 
-    public void onPageLoad() {
-    }
-    */
-
     public void setInstance(String in) {
         domain=""+in;
     }
@@ -139,17 +127,46 @@ webView.loadData(data, "text/HTML", "UTF-8");
         });
     }
 
-    public void userLogin(String clientid, String secret, String email, String pwd, NextAction next) {
-        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
-        params.add(new Pair<String, String>("client_id", clientid));
-        params.add(new Pair<String, String>("client_secret", secret));
-        params.add(new Pair<String, String>("grant_type", "password"));
-        params.add(new Pair<String, String>("username", email));
-        params.add(new Pair<String, String>("password", pwd));
-        params.add(new Pair<String, String>("scope", "read write follow"));
+    public void userLogin(String clientid, String secret, String email, String pwd, final NextAction next) {
+        Log.d("Connect","userlogin");
+
         String surl = String.format("https://%s/oauth/token", domain);
-        Object[] args = {surl, params, next};
-        new ConnectTask().execute(args);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send('client_id="+clientid+"&client_secret="+secret+"&grant_type=password&username="+email+"&password="+pwd+"&scope=read+write+follow'); ";
+        System.out.println("SENDJS "+js);
+        MouseApp.main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                MouseApp.main.jsnext=next;
+                MouseApp.main.wv.loadUrl("javascript:"+js);
+            }
+        });
+    }
+
+    public void getTL(final String tl, final NextAction next) {
+        Log.d("Connect","getTL");
+        String surl = String.format("https://%s/api/v1/"+tl, domain);
+        if (MouseApp.main.maxid>=0) surl = String.format("https://%s/api/v1/"+tl+"?max_id="+Integer.toString(MouseApp.main.maxid), domain);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('GET', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send(null);";
+        System.out.println("SENDJS "+js);
+        MouseApp.main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                MouseApp.main.jsnext=next;
+                MouseApp.main.wv.loadUrl("javascript:"+js);
+            }
+        });
     }
 
     public void sendToot(String s, NextAction next) {
@@ -181,13 +198,6 @@ webView.loadData(data, "text/HTML", "UTF-8");
         String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id)+"/unfavourite", domain);
         Object[] args = {surl, params, next};
         new PostTask().execute(args);
-    }
-    public void getTL(final String tl, NextAction next) {
-        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
-        String surl = String.format("https://%s/api/v1/"+tl, domain);
-        if (MouseApp.main.maxid>=0) surl = String.format("https://%s/api/v1/"+tl+"?max_id="+Integer.toString(MouseApp.main.maxid), domain);
-        Object[] args = {surl, params, next};
-        new GetTask().execute(args);
     }
     public String getSyncToot(final int id) {
         String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id), domain);
@@ -293,63 +303,6 @@ webView.loadData(data, "text/HTML", "UTF-8");
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return res;
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            if (next!=null) {next.run(response);}
-        }
-    }
-
-    class ConnectTask extends AsyncTask<Object, Void, String> {
-        NextAction next=null;
-        @Override
-        protected String doInBackground(Object... args) {
-            String surl=(String)args[0];
-            List<Pair<String, String>> params = (List<Pair<String, String>>)args[1];
-            next=(NextAction)args[2];
-            String res=null;
-            try {
-                URL url = new URL(surl);
-                System.out.println("mousetodon trying connecttask "+surl);
-
-                /*
-                SSLContext sslcontext = SSLContext.getInstance("TLSv1");
-                sslcontext.init(null, null, null);
-                SSLSocketFactory NoSSLv3Factory = new NoSSLv3SocketFactory(sslcontext.getSocketFactory());
-                HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3Factory);
-                */
-
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                System.out.println("mousetodon connecttask ok");
-                urlConnection.setRequestMethod("POST");
-                OutputStream os = urlConnection.getOutputStream();
-                System.out.println("mousetodon connecttask ok2");
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                String ssq = getQuery(params);
-                System.out.println("DEBUGSSSSSSS "+ssq);
-                writer.write(ssq);
-                writer.flush();
-                writer.close();
-                os.close();
-
-                urlConnection.connect();
-
-                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                StringBuilder sb = new StringBuilder();
-                String line;
-
-                while((line = br.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-
-                br.close();
-                res=sb.toString();
-                urlConnection.disconnect();
-            } catch (Exception e) {
                 e.printStackTrace();
             }
             return res;
