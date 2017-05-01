@@ -2,7 +2,6 @@ package fr.xtof54.mousetodon;
 
 import org.json.JSONObject;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import java.util.HashMap;

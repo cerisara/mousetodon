@@ -21,6 +21,7 @@ import android.widget.Toast;
 import android.graphics.Bitmap;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class MouseApp extends Activity {
     public static MouseApp main=null;
@@ -32,6 +33,10 @@ public class MouseApp extends Activity {
     public boolean userLogged=false;
     public int maxid=-1;
     public int lastTL=-1;
+
+    private static LinkedBlockingQueue<Object[]> jstodownload = new LinkedBlockingQueue<Object[]>();
+    private static Thread jsdownloader = null;
+    static String[] waitres = {null};
 
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
     ArrayList<DetToot> savetoots = new ArrayList<DetToot>();
@@ -528,16 +533,6 @@ public class MouseApp extends Activity {
         });
     }
 
-    ArrayList<String> getStatuses(ArrayList<Integer> ids) {
-        ArrayList<String> lres = new ArrayList<String>();
-        for (int id: ids) {
-            String res = connect.blockGetTL("statuses/"+Integer.toString(id));
-            lres.add(res);
-        }
-        return lres;
-    }
-
-
     void getNotifs(final String tl) {
         startWaitingWindow("Getting notifs...");
         connect.getTL(tl,new NextAction() {
@@ -597,13 +592,21 @@ public class MouseApp extends Activity {
                         }
                     }
 
-                    // now download all statutes
-                    ArrayList<String> stats = getStatuses(ids);
-                    for (int i=0;i<stats.size();i++) {
-                        JSONObject o = new JSONObject(stats.get(i));
-                        toots.set(idx.get(i),new DetToot(o,detectlang));
+                    // now download all statutes asynchronously in the background
+                    for (int i=0;i<ids.size();i++) {
+                        final int ii = idx.get(i);
+                        connect.getOneStatus(ids.get(i), new NextAction() {
+                            public void run(String res) {
+                                try {
+                                    JSONObject o = new JSONObject(res);
+                                    toots.set(ii,new DetToot(o,detectlang));
+                                    updateList();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
                     }
-                    updateList();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -736,21 +739,50 @@ public class MouseApp extends Activity {
         });
     }
 
-    public static void javascriptCmd(final String url) {
+    // empile les commandes javascript a executer + cree un thread qui les execute et attend qu'elles aient fini
+    public static void javascriptCmd(final String url, final NextAction jsnext) {
         try {
-            System.out.println("JSSS url "+url);
-            main.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    main.wvjs.loadUrl(url);
-                }
-            });
+            if (jsdownloader==null) {
+                jsdownloader = new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            for (;;) {
+                                Object[] tmp = jstodownload.take();
+                                if (tmp==null) break;
+                                final String u = (String)tmp[0];
+                                NextAction na = null;
+                                if (tmp[1]!=null) na = (NextAction)tmp[1];
+                                System.out.println("JSSS url "+u);
+                                main.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        main.wvjs.loadUrl(u);
+                                    }
+                                });
+                                // attends que l'url soit completement chargee
+                                for (;;) {
+                                    if (waitres[0]!=null) break;
+                                    Thread.sleep(100);
+                                }
+                                System.out.println("URLLLLL found "+waitres[0]);
+                                if (na!=null) na.run(waitres[0]);
+                                synchronized(waitres) {
+                                    waitres[0]=null;
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                jsdownloader.start();
+            }
+            Object[] tmp = {url,jsnext};
+            jstodownload.put(tmp);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    public NextAction jsnext=null;
 }
 
 class MyJavaScriptInterface {
@@ -768,10 +800,8 @@ class MyJavaScriptInterface {
         } else if (aContent.startsWith("DETKO")) {
             MouseApp.main.message("error connect");
         }
-        if (MouseApp.main.jsnext!=null) {
-            NextAction a=MouseApp.main.jsnext;
-            MouseApp.main.jsnext=null;
-            a.run(aContent);
+        synchronized(MouseApp.waitres) {
+            MouseApp.waitres[0]=aContent;
         }
     }
 }

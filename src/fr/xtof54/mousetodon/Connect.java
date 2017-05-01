@@ -44,7 +44,7 @@ public class Connect extends WebViewClient {
         } else {
             // c'est un GET ou POST vers l'API du server mastodon
             // je lance un appel JS pour recuperer le JSON en reponse
-            MouseApp.javascriptCmd("javascript:window.INTERFACE.processContent(document.getElementsByTagName('html')[0].innerHTML);");
+            MouseApp.javascriptCmd("javascript:window.INTERFACE.processContent(document.getElementsByTagName('html')[0].innerHTML);",null);
         }
     } 
 
@@ -112,8 +112,7 @@ webView.loadData(data, "text/HTML", "UTF-8");
             "xhr.addEventListener('error', deterror); "+
             "xhr.send('client_name=Mousetodon&scopes=read+write+follow&redirect_uris=urn:ietf:wg:oauth:2.0:oob'); ";
         System.out.println("SENDJS "+js);
-        MouseApp.main.jsnext=next;
-        MouseApp.javascriptCmd("javascript:"+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
     }
 
     public void userLogin(String clientid, String secret, String email, String pwd, final NextAction next) {
@@ -128,8 +127,7 @@ webView.loadData(data, "text/HTML", "UTF-8");
             "xhr.addEventListener('error', deterror); "+
             "xhr.send('client_id="+clientid+"&client_secret="+secret+"&grant_type=password&username="+email+"&password="+pwd+"&scope=read+write+follow'); ";
         System.out.println("SENDJS "+js);
-        MouseApp.main.jsnext=next;
-        MouseApp.javascriptCmd("javascript:"+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
     }
 
     public void getTL(final String tl, final NextAction next) {
@@ -144,9 +142,27 @@ webView.loadData(data, "text/HTML", "UTF-8");
             "xhr.addEventListener('error', deterror); "+
             "xhr.send(null);";
         System.out.println("SENDJS "+js);
-        MouseApp.main.jsnext=next;
-        MouseApp.javascriptCmd("javascript:"+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
     }
+
+    public void getOneStatus(int id, final NextAction next) {
+        Log.d("Connect","getOneStatus");
+        String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id), domain);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('GET', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send(null);";
+        System.out.println("SENDJS "+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
+    }
+
+
+
+
+
 
     public void sendToot(String s, NextAction next) {
         List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
@@ -201,35 +217,6 @@ webView.loadData(data, "text/HTML", "UTF-8");
             e.printStackTrace();
             return null;
         }
-    }
-    public String blockGetTL(final String tl) {
-        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
-        String surl = String.format("https://%s/api/v1/"+tl, domain);
-        String res=null;
-        try {
-            URL url = new URL(surl);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty("Authorization", "Bearer "+MouseApp.access_token);
-            urlConnection.connect();
-
-            int rep = urlConnection.getResponseCode();
-            BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line;
-
-            while((line = br.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-
-            br.close();
-            res=sb.toString();
-            urlConnection.disconnect();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return res; 
     }
 
     private String getQuery(List<Pair<String, String>> params) throws UnsupportedEncodingException {
