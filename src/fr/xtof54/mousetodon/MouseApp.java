@@ -811,6 +811,8 @@ class MyJavaScriptInterface {
             aContent=aContent.substring(5).trim();
             if (aContent.startsWith("{\"error\":")) {
                 MouseApp.main.message("error:"+aContent.substring(10));
+            } else if (aContent.indexOf("re sorry, but something went wrong")>=0) {
+                MouseApp.main.message("error!");
             } else MouseApp.main.message("connect OK");
         } else if (aContent.startsWith("DETKO")) {
             MouseApp.main.message("error connect");

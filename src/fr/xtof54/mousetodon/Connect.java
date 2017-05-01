@@ -157,7 +157,7 @@ webView.loadData(data, "text/HTML", "UTF-8");
     public void sendToot(String s, NextAction next) {
         Log.d("Connect","sendToot");
         String surl = String.format("https://%s/api/v1/statuses", domain);
-        String parms = "status="+s;
+        String parms = "status="+URLEncoder.encode(s, "UTF-8");
         if (MouseApp.curtootidx>=0 && MouseApp.main.toots.get(MouseApp.curtootidx).id>=0) {
             System.out.println("replying to toot "+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id));
             parms += "&in_reply_to_id="+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id);
