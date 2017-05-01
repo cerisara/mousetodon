@@ -106,12 +106,27 @@ an *SSL handshake error*. This is a known bug/incompatibility between some versi
 configurations of some Mastodon server. This issue also affects all native Java android apps, in particular *Tusky* and *Twidere*,
 but apparently it does not affect android clients that are not programmes in native java, such as TootyFruity.
 
-The problem is that secure connection with a Mastodon instance can be configured
-with various TLS protocols, and that from one version to another,
+The problem is that secure connection with a Mastodon instance can be configured (at the instance level, so
+I don't see what can done in the app to fix that) with various TLS protocols, and that from one version to another,
 the core Android libraries implement in very different ways these protocols, and sometimes, it just does not work.
 
 Note that the current default version 0.8 of Mousetodon application is also affected by this issue, but a new version of
 the Mousetodon application has been built to solve this issue: it is not yet available on F-droid, but you can already find
 it in github in the branch *webview*. The solution adopted consists in removing the faulty HttpUrlConnection class to
 communicate with the Mastodon API server and replacing it with javascript.
+
+-------------
+
+## ChangeLog
+
+### v0.8
+
+- Support multi-instances: Switch with the press of a button
+- Language detection and filtering: lightweight keywords-implementation, support fr, en, ge, sp, ja
+
+### v0.9
+
+- rewrote the connection with Mastodon API: replace HttpUrlConnection with Javascript, which solves
+a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and Twidere have the bug).
+
 
