@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import android.graphics.Bitmap;
+import java.util.HashMap;
 
 public class DetToot {
     static LangDetect langdetect = null;
@@ -15,23 +16,37 @@ public class DetToot {
     public int id=-1, parentid=-1;
     public boolean boosted = false;
     private Bitmap usericon=null;
+    private String usericonurl=null;
     public String date="";
     ArrayList<String> medias = new ArrayList<String>();
+
+    private static HashMap<Integer,DetToot> alltoots = new HashMap<Integer,DetToot>();
+    public static void checkImages() {
+        for (DetToot t : alltoots.values()) {
+            if (t!=null && t.usericon==null && t.usericonurl!=null) {
+                Bitmap img = DetIcons.avatars.get(t.usericonurl);
+                t.setIcon(img);
+            }
+        }
+    }
 
     public DetToot(JSONObject json, boolean detectlang) {
         // MUST get extra info before text because of media list
         getExtraInfos(json);
-        String texte = getText(json);
+        String texte = getText(json,true);
         try {
             if (!json.isNull("reblog")) {
                 JSONObject reblog = json.getJSONObject("reblog");
-                texte += "\n REBLOGED: "+getText(reblog);
+                texte += "\n REBLOGED: "+getText(reblog,false);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         txt=texte;
         if (detectlang) detectlang();
+
+        if (id>=0) alltoots.put(id,this);
+        else System.out.println("ERROR TOOT NOID "+json);
     }
 
     public Bitmap getUserIcon() {
@@ -69,14 +84,18 @@ public class DetToot {
         usericon=img;
     }
 
-    String getText(JSONObject json) {
+    public String getText(JSONObject json, boolean withIcon) {
         if (json==null) return "";
         try {
             String aut="";
             if (!json.isNull("account")) {
                 JSONObject acc = json.getJSONObject("account");
                 aut = acc.getString("username")+": ";
-                DetIcons.downloadImg(this,acc);
+                String avatar = acc.getString("avatar");
+                if (avatar!=null && avatar.startsWith("http")) {
+                    usericonurl=avatar;
+                    if (withIcon) DetIcons.downloadImg(this,avatar,aut);
+                }
             }
             String txt=json.getString("content");
             // look for URLs

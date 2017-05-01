@@ -19,6 +19,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.graphics.Bitmap;
+import android.widget.ImageView;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -569,7 +572,7 @@ public class MouseApp extends Activity {
                                 JSONObject acc = o.getJSONObject("account");
                                 String aut = acc.getString("username")+": ";
                                 DetToot dt = new DetToot("favourite by: "+aut);
-                                dt.txt+=dt.getText(o.getJSONObject("status"));
+                                dt.txt+=dt.getText(o.getJSONObject("status"),false);
                                 toots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);
@@ -580,7 +583,7 @@ public class MouseApp extends Activity {
                                 JSONObject acc = o.getJSONObject("account");
                                 String aut = acc.getString("username")+": ";
                                 DetToot dt = new DetToot("reblog by: "+aut);
-                                dt.txt+=dt.getText(o.getJSONObject("status"));
+                                dt.txt+=dt.getText(o.getJSONObject("status"),false);
                                 toots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);
@@ -771,6 +774,29 @@ public class MouseApp extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void syncShow(final Bitmap img, final String txt) {
+        System.out.println("SYNCSHOW "+txt);
+        main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ImageView image = new ImageView(main);
+                image.setImageBitmap(img);
+
+                AlertDialog.Builder builder = 
+                        new AlertDialog.Builder(main).
+                        setMessage(txt).
+                        setPositiveButton("OK", new DialogInterface.OnClickListener() {                     
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                            }
+                        }).
+                        setView(image);
+                builder.create().show();
+            }
+        });
     }
 }
 

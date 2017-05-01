@@ -53,7 +53,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="fill_parent"
-    android:layout_height="2pt"
+    android:layout_height="1pt"
     >
     <WebView
             android:id="@+id/webjs"
@@ -62,7 +62,7 @@
             android:isScrollContainer="false" />
     <fr.xtof54.mousetodon.DetWebView
             android:id="@+id/webimg"
-            android:layout_width="30pt"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:isScrollContainer="false" />
 </LinearLayout>

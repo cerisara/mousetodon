@@ -19,11 +19,6 @@ import android.util.Log;
 
 import java.net.URL;
 import java.net.URLEncoder;
-import java.net.HttpURLConnection;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import java.net.MalformedURLException;
 
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -212,30 +207,6 @@ webView.loadData(data, "text/HTML", "UTF-8");
         MouseApp.javascriptCmd("javascript:"+js,next);
     }
  
-    public String getSyncToot(final int id) {
-        String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id), domain);
-        try {
-            URL url = new URL(surl);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty("Authorization", "Bearer "+MouseApp.access_token);
-            urlConnection.connect();
-            int rep = urlConnection.getResponseCode();
-            BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line;
-
-            while((line = br.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-            br.close();
-            String res=sb.toString();
-            urlConnection.disconnect();
-            return res;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }
 
 
