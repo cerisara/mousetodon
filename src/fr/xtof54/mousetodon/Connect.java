@@ -157,20 +157,27 @@ webView.loadData(data, "text/HTML", "UTF-8");
     public void sendToot(String s, NextAction next) {
         Log.d("Connect","sendToot");
         String surl = String.format("https://%s/api/v1/statuses", domain);
-        String parms = "status="+URLEncoder.encode(s, "UTF-8");
-        if (MouseApp.curtootidx>=0 && MouseApp.main.toots.get(MouseApp.curtootidx).id>=0) {
-            System.out.println("replying to toot "+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id));
-            parms += "&in_reply_to_id="+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id);
+        try {
+            String parms = "status="+URLEncoder.encode(s, "UTF-8");
+            if (MouseApp.curtootidx>=0 && MouseApp.main.toots.get(MouseApp.curtootidx).id>=0) {
+                System.out.println("replying to toot "+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id));
+                parms += "&in_reply_to_id="+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id);
+            }
+            final String js = "var xhr = new XMLHttpRequest(); "+
+                "xhr.open('POST', '"+surl+"', true); "+
+                "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); "+
+                "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+                "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+                "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+                "xhr.addEventListener('error', deterror); "+
+                "xhr.send('"+parms+"'); ";
+            System.out.println("SENDJS "+js);
+            MouseApp.javascriptCmd("javascript:"+js,next);
+        } catch (Exception e) {
+            e.printStackTrace();
+            MouseApp.main.message("ERROR encoding");
+            next.run("");
         }
-        final String js = "var xhr = new XMLHttpRequest(); "+
-            "xhr.open('POST', '"+surl+"', true); "+
-            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
-            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
-            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
-            "xhr.addEventListener('error', deterror); "+
-            "xhr.send('"+parms+"'); ";
-        System.out.println("SENDJS "+js);
-        MouseApp.javascriptCmd("javascript:"+js,next);
  
         /*
          *  in_reply_to_id (optional): local ID of the status you want to reply to
@@ -185,6 +192,7 @@ webView.loadData(data, "text/HTML", "UTF-8");
         String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id)+"/favourite", domain);
         final String js = "var xhr = new XMLHttpRequest(); "+
             "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); "+
             "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
             "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
             "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
@@ -198,6 +206,7 @@ webView.loadData(data, "text/HTML", "UTF-8");
         String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id)+"/unfavourite", domain);
         final String js = "var xhr = new XMLHttpRequest(); "+
             "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); "+
             "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
             "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
             "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
