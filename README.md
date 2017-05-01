@@ -115,3 +115,18 @@ the Mousetodon application has been built to solve this issue: it is not yet ava
 it in github in the branch *webview*. The solution adopted consists in removing the faulty HttpUrlConnection class to
 communicate with the Mastodon API server and replacing it with javascript.
 
+-------------
+
+## ChangeLog
+
+### v0.8
+
+- Support multi-instances: Switch with the press of a button
+- Language detection and filtering: lightweight keywords-implementation, support fr, en, ge, sp, ja
+
+### v0.9
+
+- rewrote the connection with Mastodon API: replace HttpUrlConnection with Javascript, which solves
+a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and Twidere have the bug).
+
+
