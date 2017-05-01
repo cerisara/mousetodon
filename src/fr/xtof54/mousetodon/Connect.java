@@ -159,18 +159,24 @@ webView.loadData(data, "text/HTML", "UTF-8");
         MouseApp.javascriptCmd("javascript:"+js,next);
     }
 
-
-
-
-
-
     public void sendToot(String s, NextAction next) {
-        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
-        params.add(new Pair<String, String>("status", s));
+        Log.d("Connect","sendToot");
+        String surl = String.format("https://%s/api/v1/statuses", domain);
+        String parms = "status="+s;
         if (MouseApp.curtootidx>=0 && MouseApp.main.toots.get(MouseApp.curtootidx).id>=0) {
             System.out.println("replying to toot "+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id));
-            params.add(new Pair<String, String>("in_reply_to_id", Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id)));
+            parms += "&in_reply_to_id="+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id);
         }
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send('"+parms+"'); ";
+        System.out.println("SENDJS "+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
+ 
         /*
          *  in_reply_to_id (optional): local ID of the status you want to reply to
             media_ids (optional): array of media IDs to attach to the status (maximum 4)
@@ -178,22 +184,34 @@ webView.loadData(data, "text/HTML", "UTF-8");
             spoiler_text (optional): text to be shown as a warning before the actual content
             visibility (optional): either "direct", "private", "unlisted" or "public"
             */
-        String surl = String.format("https://%s/api/v1/statuses", domain);
-        Object[] args = {surl, params, next};
-        new PostTask().execute(args);
     }
     public void boost(int id, NextAction next) {
-        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
+        Log.d("Connect","Boost");
         String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id)+"/favourite", domain);
-        Object[] args = {surl, params, next};
-        new PostTask().execute(args);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send(null); ";
+        System.out.println("SENDJS "+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
     }
     public void unboost(int id, NextAction next) {
-        List<Pair<String, String>> params = new ArrayList<Pair<String, String>>();
+        Log.d("Connect","UnBoost");
         String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id)+"/unfavourite", domain);
-        Object[] args = {surl, params, next};
-        new PostTask().execute(args);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send(null); ";
+        System.out.println("SENDJS "+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
     }
+ 
     public String getSyncToot(final int id) {
         String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id), domain);
         try {
@@ -216,114 +234,6 @@ webView.loadData(data, "text/HTML", "UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    private String getQuery(List<Pair<String, String>> params) throws UnsupportedEncodingException {
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-
-        for (Pair<String, String> pair : params)
-        {
-            if (first)
-                first = false;
-            else
-                result.append("&");
-
-            result.append(URLEncoder.encode(pair.first, "UTF-8"));
-            result.append("=");
-            result.append(URLEncoder.encode(pair.second, "UTF-8"));
-        }
-
-        return result.toString();
-    }
-
-    class GetTask extends AsyncTask<Object, Void, String> {
-        NextAction next=null;
-        @Override
-        protected String doInBackground(Object... args) {
-            String surl=(String)args[0];
-            next=(NextAction)args[2];
-            String res=null;
-            try {
-                URL url = new URL(surl);
-                System.out.println("COCOCOCOCCOOOOOOOOOOOOOOOOOOOOOOOOOO "+surl);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("Authorization", "Bearer "+MouseApp.access_token);
-                urlConnection.connect();
-
-                int rep = urlConnection.getResponseCode();
-                System.out.println("ZOCOCOCOCCOOOOOOOOOOOOOOOOOOOOOOOOOO "+Integer.toString(rep));
-
-                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                StringBuilder sb = new StringBuilder();
-                String line;
-
-                while((line = br.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-
-                br.close();
-                res=sb.toString();
-                urlConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return res;
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            if (next!=null) {next.run(response);}
-        }
-    }
-
-    class PostTask extends AsyncTask<Object, Void, String> {
-        NextAction next=null;
-        @Override
-        protected String doInBackground(Object... args) {
-            String surl=(String)args[0];
-            List<Pair<String, String>> params = (List<Pair<String, String>>)args[1];
-            next=(NextAction)args[2];
-            String res=null;
-            try {
-                URL url = new URL(surl);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setRequestProperty("Authorization", "Bearer "+MouseApp.access_token);
-                OutputStream os = urlConnection.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                writer.write(getQuery(params));
-                writer.flush();
-                writer.close();
-                os.close();
-
-                urlConnection.connect();
-
-                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                StringBuilder sb = new StringBuilder();
-                String line;
-
-                while((line = br.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-
-                br.close();
-                res=sb.toString();
-                urlConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return res;
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            if (next!=null) {next.run(response);}
         }
     }
 }

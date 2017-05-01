@@ -676,22 +676,6 @@ public class MouseApp extends Activity {
         });
     }
 
-    private DetToot downloadOneToot(final int id) {
-        String res = connect.getSyncToot(id);
-        if (res==null) {
-            message("error getting toot");
-            return null;
-        }
-        try {
-            JSONObject o = new JSONObject(res);
-            DetToot dt = new DetToot(o,false);
-            return dt;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     void showReplyHistory() {
         if (curtootidx<0||curtootidx>=toots.size()) {
             message("no initial toot");
@@ -707,27 +691,32 @@ public class MouseApp extends Activity {
             message("no parent toot");
             return;
         }
-        Thread histthread = new Thread(new Runnable() {
-            public void run() {
-                int toot2download = tt.parentid;
-                savetoots.clear();
-                for (DetToot t : toots) savetoots.add(t);
-                toots.clear();
-                toots.add(tt);
-                startWaitingWindow("Getting toot... "+Integer.toString(toot2download));
-                for (int i=0;i<20;i++) {
-                    DetToot ttt = downloadOneToot(toot2download);
-                    if (i==0) stopWaitingWindow();
-                    if (ttt==null) break;
-                    toots.add(0,ttt);
-                    if (i==0) VisuToot.close();
+        int toot2download = tt.parentid;
+        savetoots.clear();
+        for (DetToot t : toots) savetoots.add(t);
+        // TODO: si on press back, re-afficher les savetoots
+        toots.clear();
+        toots.add(tt);
+        recursHist(toot2download);
+        VisuToot.close();
+        updateList();
+    }
+    // TODO: bloquer apres 20 toots
+    private void recursHist(final int toot) {
+        connect.getOneStatus(toot,new NextAction() {
+            public void run(String res) {
+                try {
+                    JSONObject o = new JSONObject(res);
+                    DetToot dt = new DetToot(o,false);
+                    toots.add(dt);
                     updateList();
-                    toot2download = ttt.parentid;
-                    if (toot2download<0) break;
+                    int toot2download = dt.parentid;
+                    if (toot2download>=0) recursHist(toot2download);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
-        histthread.start();
     }
 
     public static void imgurl(final String url) {
