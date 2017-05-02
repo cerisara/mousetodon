@@ -120,4 +120,10 @@ So far, I see a few options available:
 and given them to your instance owner so that he configures his instance accordingly.
 - Wait for future version of the Mastodon software, which hopefully will increase compatbility with stock Android.
 
+-------------
+
+### Features to be implemented next:
+
+- get details and toots from a user account
+- quick-toot from outside the app with *share as* thanks to TaskLabAct
 
