@@ -505,6 +505,9 @@ public class MouseApp extends Activity {
     }
     public void quit(View v) {
     }
+    public void follow(View v) {
+        message("follow not yet supported");
+    }
     public void nextAccount(View v) {
         if (++curAccount>=allinstances.size()) curAccount=0;
         SharedPreferences.Editor edit = pref.edit();
