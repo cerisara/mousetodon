@@ -516,6 +516,9 @@ public class MouseApp extends Activity {
         edit.commit();
         serverStage0();
     }
+    public void extramenu(View v) {
+        ExtraMenu.show();
+    }
 
     private NextAction torun = null;
 
