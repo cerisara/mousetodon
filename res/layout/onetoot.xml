@@ -54,14 +54,12 @@
             android:text="Parents"
             android:onClick="replyhist"
             />
-        <ToggleButton
+        <Button
             android:layout_width="wrap_content"
-            android:id="@+id/folbut"
             style="?android:attr/buttonStyleSmall"
             android:layout_height="wrap_content"
-            android:textOn="UnFollow"
-            android:textOff="  Follow"
-            android:onClick="follow"
+            android:text="Infos"
+            android:onClick="userinfos"
             />
 
     </LinearLayout>

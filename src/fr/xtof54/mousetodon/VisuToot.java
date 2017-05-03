@@ -18,7 +18,7 @@ import android.graphics.Bitmap;
 import android.content.Intent;
 
 public class VisuToot {
-	static AlertDialog dialog=null;
+	private static AlertDialog dialog=null;
 
     public static void close() {
         MouseApp.curtootidx=-1;

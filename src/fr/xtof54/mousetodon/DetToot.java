@@ -17,6 +17,7 @@ public class DetToot {
     public boolean boosted = false;
     private Bitmap usericon=null;
     private String usericonurl=null;
+    public int autid=-1;
     public String date="";
     ArrayList<String> medias = new ArrayList<String>();
 
@@ -92,6 +93,7 @@ public class DetToot {
                 JSONObject acc = json.getJSONObject("account");
                 aut = acc.getString("username")+": ";
                 String avatar = acc.getString("avatar");
+                if (!acc.isNull("id")) autid=acc.getInt("id");
                 if (avatar!=null && avatar.startsWith("http")) {
                     usericonurl=avatar;
                     if (withIcon) DetIcons.downloadImg(this,avatar,aut);

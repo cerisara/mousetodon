@@ -140,6 +140,21 @@ webView.loadData(data, "text/HTML", "UTF-8");
         MouseApp.javascriptCmd("javascript:"+js,next);
     }
 
+    public void getUserToots(final int userid, final NextAction next) {
+        Log.d("Connect","getUserToots "+Integer.toString(userid));
+        String surl = String.format("https://%s/api/v1/accounts/"+Integer.toString(userid)+"/statuses", domain);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('GET', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send(null);";
+        System.out.println("SENDJS "+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
+    }
+
+
     public void getOneStatus(int id, final NextAction next) {
         Log.d("Connect","getOneStatus");
         String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id), domain);

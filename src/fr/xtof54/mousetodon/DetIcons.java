@@ -83,8 +83,6 @@ public class DetIcons {
                                     }
                                     System.out.println("IMMMMMM found");
 
-                                    // MouseApp.syncShow(waitimg[0],uname);
-
                                     synchronized(waitimg) {
                                         waitimg[0]=null;
                                     }
