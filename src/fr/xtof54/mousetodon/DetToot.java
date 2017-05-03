@@ -101,7 +101,11 @@ public class DetToot {
             // look for URLs
             String[] words = txt.split(" ");
             for (String w : words)
-                if (w.startsWith("href=")) medias.add(w.substring(6,w.length()-1));
+                if (w.startsWith("href=")) {
+                    int nextquote = w.indexOf('"',6);
+                    if (nextquote<0) nextquote=w.length();
+                    medias.add(w.substring(6,nextquote));
+                }
             return aut+txt.trim();
         } catch (Exception e) {
             e.printStackTrace();
