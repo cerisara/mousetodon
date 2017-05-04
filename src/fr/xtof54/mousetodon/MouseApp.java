@@ -121,6 +121,7 @@ public class MouseApp extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    // show the window where the user must enter his credentials
                     UserInput.show(main, new NextAction() {
                         public void run(String res) {
                             String[] ss = res.split(" ");
@@ -505,6 +506,19 @@ public class MouseApp extends Activity {
     }
     public void quit(View v) {
     }
+    public void follow(View v) {
+        message("follow not yet supported");
+    }
+    public void userinfos(View v) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int userid = toots.get(curtootidx).autid;
+                VisuToot.close();
+                VisuUser.show(userid);
+            }
+        });
+    }
     public void nextAccount(View v) {
         if (++curAccount>=allinstances.size()) curAccount=0;
         SharedPreferences.Editor edit = pref.edit();
@@ -515,6 +529,9 @@ public class MouseApp extends Activity {
         }
         edit.commit();
         serverStage0();
+    }
+    public void extramenu(View v) {
+        ExtraMenu.show();
     }
 
     private NextAction torun = null;
@@ -774,29 +791,6 @@ public class MouseApp extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void syncShow(final Bitmap img, final String txt) {
-        System.out.println("SYNCSHOW "+txt);
-        main.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ImageView image = new ImageView(main);
-                image.setImageBitmap(img);
-
-                AlertDialog.Builder builder = 
-                        new AlertDialog.Builder(main).
-                        setMessage(txt).
-                        setPositiveButton("OK", new DialogInterface.OnClickListener() {                     
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                            }
-                        }).
-                        setView(image);
-                builder.create().show();
-            }
-        });
     }
 }
 

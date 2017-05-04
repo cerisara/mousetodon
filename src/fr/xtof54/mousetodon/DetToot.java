@@ -17,6 +17,7 @@ public class DetToot {
     public boolean boosted = false;
     private Bitmap usericon=null;
     private String usericonurl=null;
+    public int autid=-1;
     public String date="";
     ArrayList<String> medias = new ArrayList<String>();
 
@@ -92,6 +93,7 @@ public class DetToot {
                 JSONObject acc = json.getJSONObject("account");
                 aut = acc.getString("username")+": ";
                 String avatar = acc.getString("avatar");
+                if (!acc.isNull("id")) autid=acc.getInt("id");
                 if (avatar!=null && avatar.startsWith("http")) {
                     usericonurl=avatar;
                     if (withIcon) DetIcons.downloadImg(this,avatar,aut);
@@ -101,7 +103,11 @@ public class DetToot {
             // look for URLs
             String[] words = txt.split(" ");
             for (String w : words)
-                if (w.startsWith("href=")) medias.add(w.substring(6,w.length()-1));
+                if (w.startsWith("href=")) {
+                    int nextquote = w.indexOf('"',6);
+                    if (nextquote<0) nextquote=w.length();
+                    medias.add(w.substring(6,nextquote));
+                }
             return aut+txt.trim();
         } catch (Exception e) {
             e.printStackTrace();

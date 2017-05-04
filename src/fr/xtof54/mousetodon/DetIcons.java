@@ -83,8 +83,6 @@ public class DetIcons {
                                     }
                                     System.out.println("IMMMMMM found");
 
-                                    // MouseApp.syncShow(waitimg[0],uname);
-
                                     synchronized(waitimg) {
                                         waitimg[0]=null;
                                     }
@@ -103,8 +101,17 @@ public class DetIcons {
             if (img!=null) {
                 toot.setIcon(img);
             } else {
-                Object[] tmp = {toot,avatar,username};
-                todownload.put(tmp);
+                // check if the icon is on disk
+                File pictureFile = getOutputMediaFile(avatar);
+                if (pictureFile.exists()) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    img = BitmapFactory.decodeFile(pictureFile.getAbsolutePath(), options);
+                    toot.setIcon(img);
+                } else {
+                    Object[] tmp = {toot,avatar,username};
+                    todownload.put(tmp);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

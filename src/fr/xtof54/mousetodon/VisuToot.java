@@ -11,13 +11,14 @@ import android.view.LayoutInflater;
 import android.widget.TextView;
 import android.app.Activity;
 import android.widget.Button;
+import android.widget.ToggleButton;
 import android.widget.ArrayAdapter;
 import java.util.ArrayList;
 import android.graphics.Bitmap;
 import android.content.Intent;
 
 public class VisuToot {
-	static AlertDialog dialog=null;
+	private static AlertDialog dialog=null;
 
     public static void close() {
         MouseApp.curtootidx=-1;
@@ -43,6 +44,10 @@ public class VisuToot {
         dialog.show();
 
         if (MouseApp.main.toots.size()>position) {
+            ToggleButton fav = (ToggleButton)dialogview.findViewById(R.id.favbut);
+            fav.setChecked(MouseApp.main.toots.get(position).boosted);
+            ToggleButton follow = (ToggleButton)dialogview.findViewById(R.id.folbut);
+            // TODO: where to get followers ? Store it on disk !
             if (MouseApp.main.toots.get(position).medias.size()>0) {
                 ArrayAdapter adapt = new ArrayAdapter(MouseApp.main, R.layout.rowtext, MouseApp.main.toots.get(position).medias);
                 if (adapt==null) MouseApp.main.message("ERROR: media list");

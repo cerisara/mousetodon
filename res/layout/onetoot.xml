@@ -20,7 +20,7 @@
 
         <ListView
                 android:id="@+id/medialist"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="fill_parent" >
         </ListView>
     </LinearLayout>
@@ -33,33 +33,33 @@
      
         <Button
             android:layout_width="wrap_content"
+            style="?android:attr/buttonStyleSmall"
             android:layout_height="wrap_content"
             android:text="Reply"
             android:onClick="reply"
             />
-        <Button
+        <ToggleButton
             android:layout_width="wrap_content"
+            android:id="@+id/favbut"
+            style="?android:attr/buttonStyleSmall"
             android:layout_height="wrap_content"
-            android:text="Boost"
+            android:textOn="Unboost"
+            android:textOff="  Boost"
             android:onClick="boost"
             />
         <Button
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Unboost"
-            android:onClick="unboost"
-            />
-        <Button
-            android:layout_width="wrap_content"
+            style="?android:attr/buttonStyleSmall"
             android:layout_height="wrap_content"
             android:text="Parents"
             android:onClick="replyhist"
             />
         <Button
             android:layout_width="wrap_content"
+            style="?android:attr/buttonStyleSmall"
             android:layout_height="wrap_content"
-            android:text="Close"
-            android:onClick="closeOnetoot"
+            android:text="Infos"
+            android:onClick="userinfos"
             />
 
     </LinearLayout>

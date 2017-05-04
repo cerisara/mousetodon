@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 public class CustomList extends ArrayAdapter<String> {
  
     private final Activity context;
+    public boolean withimg = true;
 
     public CustomList(Activity context, ArrayList<String> tts) {
         super(context, R.layout.row, tts);
@@ -27,7 +28,7 @@ public class CustomList extends ArrayAdapter<String> {
         TextView txtTitle = (TextView) rowView.findViewById(R.id.txt);
         ImageView imageView = (ImageView) rowView.findViewById(R.id.img);
         txtTitle.setText(Html.fromHtml(getItem(position)));
-        if (MouseApp.imgsinrow.size()>position) {
+        if (withimg && MouseApp.imgsinrow.size()>position) {
             Bitmap bMap = MouseApp.imgsinrow.get(position);
             imageView.setImageBitmap(bMap);
         }
