@@ -19,9 +19,14 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.graphics.Bitmap;
+import android.widget.ImageView;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class MouseApp extends Activity
-{
+public class MouseApp extends Activity {
     public static MouseApp main=null;
     public static String access_token=null;
     public static String tmpfiledir=null;
@@ -32,9 +37,16 @@ public class MouseApp extends Activity
     public int maxid=-1;
     public int lastTL=-1;
 
+    private static LinkedBlockingQueue<Object[]> jstodownload = new LinkedBlockingQueue<Object[]>();
+    private static Thread jsdownloader = null;
+    static String[] waitres = {null};
+
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
     ArrayList<DetToot> savetoots = new ArrayList<DetToot>();
     String[] filterlangs = null;
+
+    private DetWebView wvimg;
+    private WebView wvjs;
 
     ArrayList<String> allinstances=new ArrayList<String>();
     int curAccount=0;
@@ -54,8 +66,7 @@ public class MouseApp extends Activity
 
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MouseApp.main=this;
         setContentView(R.layout.main);
@@ -86,6 +97,13 @@ public class MouseApp extends Activity
         tmpfiledir=mouseappdir.getAbsolutePath();
         Log.d("CACHEDIR",tmpfiledir);
         imgsinrow.clear();
+
+        connect = new Connect();
+        wvimg = (DetWebView)findViewById(R.id.webimg);
+        wvjs = (WebView)findViewById(R.id.webjs);
+        wvjs.getSettings().setJavaScriptEnabled(true);
+        wvjs.setWebViewClient(connect);
+        wvjs.addJavascriptInterface(new MyJavaScriptInterface(), "INTERFACE"); 
 
         serverStage0();
     }
@@ -143,7 +161,7 @@ public class MouseApp extends Activity
     }
     public void serverStage1() {
         // check if the app is registered
-        connect = new Connect(instanceDomain);
+        connect.setInstance(instanceDomain);
         clientId = pref.getString(String.format("client_id_for_%s", instanceDomain), null);
         clientSecret = pref.getString(String.format("client_secret_for_%s", instanceDomain), null);
         if (clientId==null||clientSecret==null) {
@@ -281,6 +299,7 @@ public class MouseApp extends Activity
     }
 
     void updateList() {
+        System.out.println("UIUUUUUUUUUUUUUULLLL");
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -517,16 +536,6 @@ public class MouseApp extends Activity
         });
     }
 
-    ArrayList<String> getStatuses(ArrayList<Integer> ids) {
-        ArrayList<String> lres = new ArrayList<String>();
-        for (int id: ids) {
-            String res = connect.blockGetTL("statuses/"+Integer.toString(id));
-            lres.add(res);
-        }
-        return lres;
-    }
-
-
     void getNotifs(final String tl) {
         startWaitingWindow("Getting notifs...");
         connect.getTL(tl,new NextAction() {
@@ -563,7 +572,7 @@ public class MouseApp extends Activity
                                 JSONObject acc = o.getJSONObject("account");
                                 String aut = acc.getString("username")+": ";
                                 DetToot dt = new DetToot("favourite by: "+aut);
-                                dt.txt+=dt.getText(o.getJSONObject("status"));
+                                dt.txt+=dt.getText(o.getJSONObject("status"),false);
                                 toots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);
@@ -574,7 +583,7 @@ public class MouseApp extends Activity
                                 JSONObject acc = o.getJSONObject("account");
                                 String aut = acc.getString("username")+": ";
                                 DetToot dt = new DetToot("reblog by: "+aut);
-                                dt.txt+=dt.getText(o.getJSONObject("status"));
+                                dt.txt+=dt.getText(o.getJSONObject("status"),false);
                                 toots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);
@@ -586,13 +595,21 @@ public class MouseApp extends Activity
                         }
                     }
 
-                    // now download all statutes
-                    ArrayList<String> stats = getStatuses(ids);
-                    for (int i=0;i<stats.size();i++) {
-                        JSONObject o = new JSONObject(stats.get(i));
-                        toots.set(idx.get(i),new DetToot(o,detectlang));
+                    // now download all statutes asynchronously in the background
+                    for (int i=0;i<ids.size();i++) {
+                        final int ii = idx.get(i);
+                        connect.getOneStatus(ids.get(i), new NextAction() {
+                            public void run(String res) {
+                                try {
+                                    JSONObject o = new JSONObject(res);
+                                    toots.set(ii,new DetToot(o,detectlang));
+                                    updateList();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
                     }
-                    updateList();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -662,22 +679,6 @@ public class MouseApp extends Activity
         });
     }
 
-    private DetToot downloadOneToot(final int id) {
-        String res = connect.getSyncToot(id);
-        if (res==null) {
-            message("error getting toot");
-            return null;
-        }
-        try {
-            JSONObject o = new JSONObject(res);
-            DetToot dt = new DetToot(o,false);
-            return dt;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     void showReplyHistory() {
         if (curtootidx<0||curtootidx>=toots.size()) {
             message("no initial toot");
@@ -693,26 +694,132 @@ public class MouseApp extends Activity
             message("no parent toot");
             return;
         }
-        Thread histthread = new Thread(new Runnable() {
-            public void run() {
-                int toot2download = tt.parentid;
-                savetoots.clear();
-                for (DetToot t : toots) savetoots.add(t);
-                toots.clear();
-                toots.add(tt);
-                startWaitingWindow("Getting toot... "+Integer.toString(toot2download));
-                for (int i=0;i<20;i++) {
-                    DetToot ttt = downloadOneToot(toot2download);
-                    if (i==0) stopWaitingWindow();
-                    if (ttt==null) break;
-                    toots.add(0,ttt);
-                    if (i==0) VisuToot.close();
+        int toot2download = tt.parentid;
+        savetoots.clear();
+        for (DetToot t : toots) savetoots.add(t);
+        // TODO: si on press back, re-afficher les savetoots
+        toots.clear();
+        toots.add(tt);
+        recursHist(toot2download);
+        VisuToot.close();
+        updateList();
+    }
+    // TODO: bloquer apres 20 toots
+    private void recursHist(final int toot) {
+        connect.getOneStatus(toot,new NextAction() {
+            public void run(String res) {
+                try {
+                    JSONObject o = new JSONObject(res);
+                    DetToot dt = new DetToot(o,false);
+                    toots.add(dt);
                     updateList();
-                    toot2download = ttt.parentid;
-                    if (toot2download<0) break;
+                    int toot2download = dt.parentid;
+                    if (toot2download>=0) recursHist(toot2download);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
-        histthread.start();
+    }
+
+    public static void imgurl(final String url) {
+        main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                main.wvimg.loadUrl(url);
+            }
+        });
+    }
+
+    // empile les commandes javascript a executer + cree un thread qui les execute et attend qu'elles aient fini
+    public static void javascriptCmd(final String url, final NextAction jsnext) {
+        try {
+            if (jsdownloader==null) {
+                jsdownloader = new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            for (;;) {
+                                Object[] tmp = jstodownload.take();
+                                if (tmp==null) break;
+                                final String u = (String)tmp[0];
+                                NextAction na = null;
+                                if (tmp[1]!=null) na = (NextAction)tmp[1];
+                                System.out.println("JSSS url "+u);
+                                main.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        main.wvjs.loadUrl(u);
+                                    }
+                                });
+                                // attends que l'url soit completement chargee
+                                for (;;) {
+                                    if (waitres[0]!=null) break;
+                                    Thread.sleep(100);
+                                }
+                                System.out.println("URLLLLL found "+waitres[0]);
+                                if (na!=null) na.run(waitres[0]);
+                                synchronized(waitres) {
+                                    waitres[0]=null;
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                jsdownloader.start();
+            }
+            Object[] tmp = {url,jsnext};
+            jstodownload.put(tmp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void syncShow(final Bitmap img, final String txt) {
+        System.out.println("SYNCSHOW "+txt);
+        main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ImageView image = new ImageView(main);
+                image.setImageBitmap(img);
+
+                AlertDialog.Builder builder = 
+                        new AlertDialog.Builder(main).
+                        setMessage(txt).
+                        setPositiveButton("OK", new DialogInterface.OnClickListener() {                     
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                            }
+                        }).
+                        setView(image);
+                builder.create().show();
+            }
+        });
     }
 }
+
+class MyJavaScriptInterface {
+    public MyJavaScriptInterface() {
+    }
+
+    @SuppressWarnings("unused")
+    public void processContent(String aContent) {
+        System.out.println("texttread "+aContent);
+        if (aContent.startsWith("DETOK")) {
+            aContent=aContent.substring(5).trim();
+            if (aContent.startsWith("{\"error\":")) {
+                MouseApp.main.message("error:"+aContent.substring(10));
+            } else if (aContent.indexOf("re sorry, but something went wrong")>=0) {
+                MouseApp.main.message("error!");
+            } else MouseApp.main.message("connect OK");
+        } else if (aContent.startsWith("DETKO")) {
+            MouseApp.main.message("error connect");
+        }
+        synchronized(MouseApp.waitres) {
+            MouseApp.waitres[0]=aContent;
+        }
+    }
+}
+
