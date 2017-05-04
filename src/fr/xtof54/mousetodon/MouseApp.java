@@ -711,27 +711,22 @@ public class MouseApp extends Activity {
             message("no parent toot");
             return;
         }
+        VisuHistory.show();
         int toot2download = tt.parentid;
-        savetoots.clear();
-        for (DetToot t : toots) savetoots.add(t);
-        // TODO: si on press back, re-afficher les savetoots
-        toots.clear();
-        toots.add(tt);
-        recursHist(toot2download);
+        VisuHistory.addToot(tt);
+        recursHist(toot2download, 20);
         VisuToot.close();
-        updateList();
     }
-    // TODO: bloquer apres 20 toots
-    private void recursHist(final int toot) {
+    private void recursHist(final int toot, final int curtoot) {
+        if (curtoot<=0) return;
         connect.getOneStatus(toot,new NextAction() {
             public void run(String res) {
                 try {
                     JSONObject o = new JSONObject(res);
                     DetToot dt = new DetToot(o,false);
-                    toots.add(dt);
-                    updateList();
+                    VisuHistory.addToot(dt);
                     int toot2download = dt.parentid;
-                    if (toot2download>=0) recursHist(toot2download);
+                    if (toot2download>=0) recursHist(toot2download, curtoot-1);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
