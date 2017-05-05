@@ -18,6 +18,7 @@ import java.io.FileWriter;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 import android.app.AlertDialog;
@@ -508,8 +509,23 @@ public class MouseApp extends Activity {
     }
     public void quit(View v) {
     }
-    public void follow(View v) {
-        message("follow not yet supported");
+    public void follow(final View v) {
+        final NextAction dumbaction = new NextAction() {
+            public void run(String res) {}
+        };
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ToggleButton tb = (ToggleButton)v;
+                if (tb.isChecked()) {
+                    connect.followUser(VisuUser.curuserid, dumbaction);
+                    message("following user "+VisuUser.curuserid);
+                } else {
+                    connect.unfollowUser(VisuUser.curuserid, dumbaction);
+                    message("unfollowing user "+VisuUser.curuserid);
+                }
+            }
+        });
     }
     public void userinfos(View v) {
         runOnUiThread(new Runnable() {

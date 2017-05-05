@@ -154,6 +154,32 @@ webView.loadData(data, "text/HTML", "UTF-8");
         MouseApp.javascriptCmd("javascript:"+js,next);
     }
 
+    public void followUser(final int userid, final NextAction next) {
+        Log.d("Connect","followUser "+Integer.toString(userid));
+        String surl = String.format("https://%s/api/v1/accounts/"+Integer.toString(userid)+"/follow", domain);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send(null);";
+        System.out.println("SENDJS "+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
+    }
+    public void unfollowUser(final int userid, final NextAction next) {
+        Log.d("Connect","unfollowUser "+Integer.toString(userid));
+        String surl = String.format("https://%s/api/v1/accounts/"+Integer.toString(userid)+"/unfollow", domain);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send(null);";
+        System.out.println("SENDJS "+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
+    }
 
     public void getOneStatus(int id, final NextAction next) {
         Log.d("Connect","getOneStatus");

@@ -23,7 +23,7 @@ public class DetToot {
     public boolean boosted = false;
     private Bitmap usericon=null;
     private String usericonurl=null;
-    private String username=null;
+    public String username=null;
     public int autid=-1;
     public String date=""; // formatted in ISO 8601
     ArrayList<String> medias = new ArrayList<String>();

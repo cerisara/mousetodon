@@ -126,8 +126,12 @@ communicate with the Mastodon API server and replacing it with javascript.
 
 ### v0.9
 
-- rewrote the connection with Mastodon API: replace HttpUrlConnection with Javascript, which solves
+- Rewrote the connection with Mastodon API: replace HttpUrlConnection with Javascript, which solves
 a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and Twidere have the bug).
+- Show list of toots per user
+- Better date formatting
+- Smoother icon loading in the background, with caching
+- Support added for following user 
 
 -------------
 

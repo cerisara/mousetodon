@@ -22,6 +22,7 @@ import android.content.Intent;
 
 public class VisuUser {
 	private static AlertDialog dialog=null;
+    public static int curuserid=-1;
 
     public static void close() {
         if (dialog!=null) {
@@ -30,6 +31,7 @@ public class VisuUser {
         }
     }
     public static void show(final int userid) {
+        curuserid = userid;
         Activity main = MouseApp.main;
 
         LayoutInflater inflater = LayoutInflater.from(main);
