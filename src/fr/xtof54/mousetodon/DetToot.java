@@ -3,16 +3,17 @@ package fr.xtof54.mousetodon;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.text.DateFormat;
-
-import javax.xml.bind.DatatypeConverter;
+import java.text.SimpleDateFormat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import android.graphics.Bitmap;
 import java.util.HashMap;
+import java.util.Date;
 
 public class DetToot {
     static LangDetect langdetect = null;
@@ -73,7 +74,6 @@ public class DetToot {
                     if (!acc.isNull("id")) autid=acc.getInt("id");
                     if (avatar!=null && avatar.startsWith("http")) {
                         usericonurl=avatar;
-                        if (withIcon) DetIcons.downloadImg(this,avatar,aut);
                     }
                 }
 
@@ -105,6 +105,7 @@ public class DetToot {
     public String getText(JSONObject json, boolean withIcon) {
         if (json==null) return "";
         try {
+            if (withIcon&&usericonurl!=null) DetIcons.downloadImg(this,usericonurl,username);
             String txt=json.getString("content");
             // look for URLs
             String[] words = txt.split(" ");
@@ -146,20 +147,53 @@ public class DetToot {
         if (medias.size()>0) attrs+="♭";
         if (parentid>=0) attrs+="↑";
 
-        if (username!=null) attrs+="<span style=\"color:red;\">"+username+" </span>";
+        if (username!=null) attrs+=username;
         if (date.length()>0) {
-            Calendar c = javax.xml.bind.DatatypeConverter.parseDateTime(date);
+            Calendar c = ISO8601.toCalendar(date);
             TimeZone tz = TimeZone.getDefault();
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             formatter.setCalendar(c);
             formatter.setTimeZone(tz); // convert the date to the current user
             String datestr = formatter.format(c.getTime());
-            attrs+="<span style=\"color:green;\">"+datestr+"</span>";
+            attrs+=" <font color='#EE0000'>"+datestr+"</font>";
         }
         if (lang!=null) attrs+=" ("+lang+")";
-        if (attrs.length()>0) return "<p>"+sttrs+"</p>"+txt.trim();
+        if (attrs.length()>0) return "<p>"+attrs+"</p>"+txt.trim();
         else return txt.trim();
     }
 }
 
+/**
+ * Helper class for handling a most common subset of ISO 8601 strings
+ * (in the following format: "2008-03-01T13:00:00+01:00"). It supports
+ * parsing the "Z" timezone, but many other less-used features are
+ * missing.
+ */
+class ISO8601 {
+    /** Transform Calendar to ISO 8601 string. */
+    public static String fromCalendar(final Calendar calendar) {
+        Date date = calendar.getTime();
+        String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date);
+        return formatted.substring(0, 22) + ":" + formatted.substring(22);
+    }
+
+    /** Get current date and time formatted as ISO 8601 string. */
+    public static String now() {
+        return fromCalendar(GregorianCalendar.getInstance());
+    }
+
+    /** Transform ISO 8601 string to Calendar. */
+    public static Calendar toCalendar(final String iso8601string) {
+        Calendar calendar = GregorianCalendar.getInstance();
+        String s = iso8601string.replace("Z", "+00:00");
+        try {
+            s = s.substring(0, 22) + s.substring(23);  // to get rid of the ":"
+            Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(s);
+            calendar.setTime(date);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return calendar;
+    }
+}
 
