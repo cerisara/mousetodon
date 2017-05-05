@@ -38,7 +38,6 @@ public class VisuUser {
         ArrayList<String> oo = new ArrayList<String>();
         for (int i=0;i<20;i++) oo.add("EEEE");
         final CustomList adapt = new CustomList(MouseApp.main, oo);
-        adapt.withimg=false;
 
         dialog = new AlertDialog.Builder(main).create();
         dialog.setTitle("User infos");

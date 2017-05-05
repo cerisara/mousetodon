@@ -73,6 +73,7 @@ public class MouseApp extends Activity {
         pref = getSharedPreferences("MouseApp", MODE_PRIVATE);
         ArrayList<String> tmp = new ArrayList<String>();
         adapter = new CustomList(MouseApp.main, tmp);
+        adapter.imgsinrow = imgsinrow;
         ListView list=(ListView)findViewById(R.id.list);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
