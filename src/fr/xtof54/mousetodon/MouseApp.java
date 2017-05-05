@@ -162,6 +162,7 @@ public class MouseApp extends Activity {
         }
     }
     public void serverStage1() {
+        setTitle("MouseApp "+instanceDomain);
         // check if the app is registered
         connect.setInstance(instanceDomain);
         clientId = pref.getString(String.format("client_id_for_%s", instanceDomain), null);

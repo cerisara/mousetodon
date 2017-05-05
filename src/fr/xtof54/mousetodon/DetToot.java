@@ -2,6 +2,11 @@ package fr.xtof54.mousetodon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Calendar;
+import java.util.TimeZone;
+import java.text.DateFormat;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,8 +22,9 @@ public class DetToot {
     public boolean boosted = false;
     private Bitmap usericon=null;
     private String usericonurl=null;
+    private String username=null;
     public int autid=-1;
-    public String date="";
+    public String date=""; // formatted in ISO 8601
     ArrayList<String> medias = new ArrayList<String>();
 
     private static HashMap<Integer,DetToot> alltoots = new HashMap<Integer,DetToot>();
@@ -60,6 +66,17 @@ public class DetToot {
             try {
                 id = json.getInt("id");
 
+                if (!json.isNull("account")) {
+                    JSONObject acc = json.getJSONObject("account");
+                    username = acc.getString("acct");
+                    String avatar = acc.getString("avatar");
+                    if (!acc.isNull("id")) autid=acc.getInt("id");
+                    if (avatar!=null && avatar.startsWith("http")) {
+                        usericonurl=avatar;
+                        if (withIcon) DetIcons.downloadImg(this,avatar,aut);
+                    }
+                }
+
                 if (!json.isNull("created_at")) date=json.getString("created_at");
 
                 if (!json.isNull("in_reply_to_id")) parentid=json.getInt("in_reply_to_id");
@@ -88,17 +105,6 @@ public class DetToot {
     public String getText(JSONObject json, boolean withIcon) {
         if (json==null) return "";
         try {
-            String aut="";
-            if (!json.isNull("account")) {
-                JSONObject acc = json.getJSONObject("account");
-                aut = acc.getString("username")+": ";
-                String avatar = acc.getString("avatar");
-                if (!acc.isNull("id")) autid=acc.getInt("id");
-                if (avatar!=null && avatar.startsWith("http")) {
-                    usericonurl=avatar;
-                    if (withIcon) DetIcons.downloadImg(this,avatar,aut);
-                }
-            }
             String txt=json.getString("content");
             // look for URLs
             String[] words = txt.split(" ");
@@ -108,7 +114,7 @@ public class DetToot {
                     if (nextquote<0) nextquote=w.length();
                     medias.add(w.substring(6,nextquote));
                 }
-            return aut+txt.trim();
+            return txt.trim();
         } catch (Exception e) {
             e.printStackTrace();
             return "";
@@ -134,17 +140,25 @@ public class DetToot {
     /* The method that is called to show the toot in the ListView
      * */
     public String getStr() {
-        String s=""+txt;
-        if (lang!=null) s+=" ("+lang+")";
 
         String attrs="";
         if (boosted) attrs+="♡";
         if (medias.size()>0) attrs+="♭";
         if (parentid>=0) attrs+="↑";
 
-        if (attrs.length()>0) attrs+=" ";
-        if (date.length()>0) s=attrs+date+" "+s;
-        return s;
+        if (username!=null) attrs+="<span style=\"color:red;\">"+username+" </span>";
+        if (date.length()>0) {
+            Calendar c = javax.xml.bind.DatatypeConverter.parseDateTime(date);
+            TimeZone tz = TimeZone.getDefault();
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            formatter.setCalendar(c);
+            formatter.setTimeZone(tz); // convert the date to the current user
+            String datestr = formatter.format(c.getTime());
+            attrs+="<span style=\"color:green;\">"+datestr+"</span>";
+        }
+        if (lang!=null) attrs+=" ("+lang+")";
+        if (attrs.length()>0) return "<p>"+sttrs+"</p>"+txt.trim();
+        else return txt.trim();
     }
 }
 
