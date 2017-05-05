@@ -23,6 +23,7 @@ import android.content.Intent;
 public class VisuUser {
 	private static AlertDialog dialog=null;
     public static int curuserid=-1;
+    private static ArrayList<DetToot> tootlist = new ArrayList<DetToot>();
 
     public static void close() {
         if (dialog!=null) {
@@ -40,6 +41,7 @@ public class VisuUser {
         ArrayList<String> oo = new ArrayList<String>();
         for (int i=0;i<20;i++) oo.add("EEEE");
         final CustomList adapt = new CustomList(MouseApp.main, oo);
+        tootlist.clear();
 
         dialog = new AlertDialog.Builder(main).create();
         dialog.setTitle("User infos");
@@ -49,6 +51,21 @@ public class VisuUser {
         ListView list=(ListView)dialog.findViewById(R.id.usertootlist);
         System.out.println("LLLLLLLIST "+list);
         list.setAdapter(adapt);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                {
+                    MouseApp.main.tootselected=tootlist.get(position);
+                    MouseApp.main.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            VisuUser.close();
+                            VisuToot.show(MouseApp.main.tootselected);
+                        }
+                    });
+                }
+            }
+        });
 
         /*
          WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -74,10 +91,12 @@ public class VisuUser {
                                 JSONArray json = new JSONArray(res);
                                 System.out.println("USERTOOOOOOOOOOOO "+Integer.toString(json.length()));
                                 adapt.clear();
+                                tootlist.clear();
                                 for (int i=0;i<json.length();i++) {
                                     JSONObject o = (JSONObject)json.get(i);
                                     DetToot dt = new DetToot(o,false);
                                     adapt.add(dt.getStr());
+                                    tootlist.add(dt);
                                     System.out.println("USERTLLLLLLLO "+dt.getStr());
                                 }
                                 adapt.notifyDataSetChanged();

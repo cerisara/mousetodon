@@ -63,7 +63,7 @@ public class MouseApp extends Activity {
     CustomList adapter=null;
     public static ArrayList<Bitmap> imgsinrow = new ArrayList<Bitmap>();
 
-    public static int curtootidx = -1;
+    public static DetToot tootselected = null;
 
     /** Called when the activity is first created. */
     @Override
@@ -82,11 +82,11 @@ public class MouseApp extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (position>=toots.size()) getOlderToots();
                 else {
-                    curtootidx = position;
+                    tootselected=toots.get(position);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            VisuToot.show(curtootidx);
+                            VisuToot.show(tootselected);
                         }
                     });
                 }
@@ -482,7 +482,27 @@ public class MouseApp extends Activity {
         else message("not connected");
     }
     public void reply(View v) {
-        writeToot(null);
+        if (connect==null||!userLogged) {
+            message("not connected");
+            return;
+        }
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+                UserWritings.show(main, new NextAction() {
+                    public void run(String res) {
+                        if (res.length()>0) {
+                            startWaitingWindow("Sending toot...");
+                            connect.replyToot(res, tootselected, new NextAction() {
+                                public void run(String res) {
+                                    stopWaitingWindow();
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
     }
     public void writeToot(View v) {
         if (connect==null||!userLogged) {
@@ -531,7 +551,7 @@ public class MouseApp extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                int userid = toots.get(curtootidx).autid;
+                int userid = tootselected.autid;
                 VisuToot.close();
                 VisuUser.show(userid);
             }
@@ -655,13 +675,13 @@ public class MouseApp extends Activity {
     }
 
     void unboost() {
-        if (curtootidx>=0 && toots.get(curtootidx).id>=0 && toots.get(curtootidx).boosted) {
+        if (tootselected!=null && tootselected.boosted) {
             startWaitingWindow("Unboosting toot...");
-            connect.unboost(toots.get(curtootidx).id, new NextAction() {
+            connect.unboost(tootselected.id, new NextAction() {
                 public void run(String res) {
                     stopWaitingWindow();
                     // TODO check if error here
-                    toots.get(curtootidx).boosted=false;
+                    tootselected.boosted=false;
                 }
             });
         } else {
@@ -670,13 +690,13 @@ public class MouseApp extends Activity {
     }
 
     void boost() {
-        if (curtootidx>=0 && toots.get(curtootidx).id>=0 && !toots.get(curtootidx).boosted) {
+        if (tootselected!=null && !tootselected.boosted) {
             startWaitingWindow("Boosting toot...");
-            connect.boost(toots.get(curtootidx).id, new NextAction() {
+            connect.boost(tootselected.id, new NextAction() {
                 public void run(String res) {
                     stopWaitingWindow();
                     // TODO check if error here
-                    toots.get(curtootidx).boosted=true;
+                    tootselected.boosted=true;
                 }
             });
         } else {
@@ -715,24 +735,22 @@ public class MouseApp extends Activity {
     }
 
     void showReplyHistory() {
-        if (curtootidx<0||curtootidx>=toots.size()) {
+        if (tootselected==null) {
             message("no initial toot");
             return;
         }
-        final DetToot tt = toots.get(curtootidx);
-        if (tt.id<0) {
+        if (tootselected.id<0) {
             message("no initial toot");
             return;
         }
         // y a-t-il des toots parents ?
-        if (tt.parentid<0) {
+        if (tootselected.parentid<0) {
             message("no parent toot");
             return;
         }
         VisuHistory.show();
-        int toot2download = tt.parentid;
-        VisuHistory.addToot(tt);
-        recursHist(toot2download, 20);
+        VisuHistory.addToot(tootselected);
+        recursHist(tootselected.parentid, 20);
         VisuToot.close();
     }
     private void recursHist(final int toot, final int curtoot) {

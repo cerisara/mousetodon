@@ -195,15 +195,37 @@ webView.loadData(data, "text/HTML", "UTF-8");
         MouseApp.javascriptCmd("javascript:"+js,next);
     }
 
+    public void replyToot(String s, DetToot origintoot, NextAction next) {
+        Log.d("Connect","sendToot");
+        String surl = String.format("https://%s/api/v1/statuses", domain);
+        try {
+            String parms = "status="+URLEncoder.encode(s, "UTF-8");
+            if (origintoot!=null && origintoot.id>=0) {
+                System.out.println("replying to toot "+Integer.toString(origintoot.id));
+                parms += "&in_reply_to_id="+Integer.toString(origintoot.id);
+            }
+            final String js = "var xhr = new XMLHttpRequest(); "+
+                "xhr.open('POST', '"+surl+"', true); "+
+                "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); "+
+                "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+                "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+                "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+                "xhr.addEventListener('error', deterror); "+
+                "xhr.send('"+parms+"'); ";
+            System.out.println("SENDJS "+js);
+            MouseApp.javascriptCmd("javascript:"+js,next);
+        } catch (Exception e) {
+            e.printStackTrace();
+            MouseApp.main.message("ERROR encoding");
+            next.run("");
+        }
+    }
+
     public void sendToot(String s, NextAction next) {
         Log.d("Connect","sendToot");
         String surl = String.format("https://%s/api/v1/statuses", domain);
         try {
             String parms = "status="+URLEncoder.encode(s, "UTF-8");
-            if (MouseApp.curtootidx>=0 && MouseApp.main.toots.get(MouseApp.curtootidx).id>=0) {
-                System.out.println("replying to toot "+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id));
-                parms += "&in_reply_to_id="+Integer.toString(MouseApp.main.toots.get(MouseApp.curtootidx).id);
-            }
             final String js = "var xhr = new XMLHttpRequest(); "+
                 "xhr.open('POST', '"+surl+"', true); "+
                 "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); "+

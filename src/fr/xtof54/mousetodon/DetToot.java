@@ -185,10 +185,12 @@ class ISO8601 {
     /** Transform ISO 8601 string to Calendar. */
     public static Calendar toCalendar(final String iso8601string) {
         Calendar calendar = GregorianCalendar.getInstance();
-        String s = iso8601string.replace("Z", "+00:00");
+        // String s = iso8601string.replace("Z", "+00:00");
         try {
-            s = s.substring(0, 22) + s.substring(23);  // to get rid of the ":"
-            Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(s);
+            // s = s.substring(0, 22) + s.substring(23);  // to get rid of the ":"
+            SimpleDateFormat datef = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            datef.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date date = datef.parse(iso8601string);
             calendar.setTime(date);
         } catch (Exception e) {
             e.printStackTrace();

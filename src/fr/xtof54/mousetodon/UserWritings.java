@@ -22,9 +22,6 @@ public class UserWritings {
         dialog = new AlertDialog.Builder(main).create();
         dialog.setTitle("Please write your toot");
         dialog.setView(dialogview);
-        if (MouseApp.curtootidx>=0) {
-            // TODO: this is a reply, so insert @user in text field
-        }
         dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
