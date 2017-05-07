@@ -12,6 +12,7 @@ public class DetIcons {
     public static HashMap<String,Bitmap> avatars = new HashMap<String,Bitmap>();
     private static Bitmap[] waitimg={null};
     private static LinkedBlockingQueue<Object[]> todownload = new LinkedBlockingQueue<Object[]>();
+    private static final Object[] finfin = {null};
     private static Thread downloader = null;
 
     private static File getOutputMediaFile(String url){
@@ -65,7 +66,7 @@ public class DetIcons {
     public static void stopAll() {
         try {
             todownload.clear();
-            todownload.put(null);
+            todownload.put(finfin);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,7 +80,7 @@ public class DetIcons {
                         try {
                             for (;;) {
                                 Object[] tmp = todownload.take();
-                                if (tmp==null) break;
+                                if (tmp==finfin) break;
                                 String u = (String)tmp[1];
                                 String uname = (String)tmp[2];
                                 // inutile de downloader si deja fait

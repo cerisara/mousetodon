@@ -39,6 +39,7 @@ public class MouseApp extends Activity {
     public int lastTL=-1;
 
     private static LinkedBlockingQueue<Object[]> jstodownload = new LinkedBlockingQueue<Object[]>();
+    private static final Object[] finfin = {null};
     private static Thread jsdownloader = null;
     static String[] waitres = {null};
 
@@ -69,11 +70,11 @@ public class MouseApp extends Activity {
     public static DetToot tootselected = null;
 
     @Override
-    public void onPause() {stopAll();}
+    public void onPause() {super.onPause(); stopAll();}
     @Override
-    public void onStop() {stopAll();}
+    public void onStop() {super.onStop(); stopAll();}
     @Override
-    public void onDestroy() {stopAll();}
+    public void onDestroy() {super.onDestroy(); stopAll();}
 
     /** Called when the activity is first created. */
     @Override
@@ -263,7 +264,7 @@ public class MouseApp extends Activity {
         tootsmgr=null;
         jstodownload.clear();
         try {
-            jstodownload.put(null);
+            jstodownload.put(finfin);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -675,7 +676,7 @@ public class MouseApp extends Activity {
             boolean isFirstCall = true;
             // attention: avec getNotifs, cette fonction est appelee plusieurs fois !
             public void gotNewToots(ArrayList<DetToot> newtoots) {
-                if (isFirstCall) {
+                if (true||isFirstCall) {
                     stopWaitingWindow();
                     isFirstCall=false;
                 }
@@ -743,7 +744,9 @@ public class MouseApp extends Activity {
                             restoots.add(dt);
                         }
                     }
-
+                    if (ids.size()==0) {
+                        action2.gotNewToots(restoots);
+                    }
                     // now download all statutes
                     for (int i=0;i<ids.size();i++) {
                         final int ii = idx.get(i);
@@ -888,7 +891,7 @@ public class MouseApp extends Activity {
                         try {
                             for (;;) {
                                 Object[] tmp = jstodownload.take();
-                                if (tmp==null) break;
+                                if (tmp==finfin) break;
                                 final String u = (String)tmp[0];
                                 NextAction na = null;
                                 if (tmp[1]!=null) na = (NextAction)tmp[1];
