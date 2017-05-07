@@ -517,7 +517,7 @@ public class MouseApp extends Activity {
         jstodownload.clear();
         lastTL=2;
         maxid=-1;
-        if (!downloadInBackground) {
+        {
             if (connect!=null&&userLogged) getToots("timelines/public");
             else message("not connected");
         }
@@ -527,7 +527,7 @@ public class MouseApp extends Activity {
         jstodownload.clear();
         lastTL=0;
         maxid=-1;
-        if (!downloadInBackground) {
+        {
             if (connect!=null&&userLogged) getToots("timelines/home");
             else message("not connected");
         }
@@ -537,7 +537,7 @@ public class MouseApp extends Activity {
         jstodownload.clear();
         lastTL=1;
         maxid=-1;
-        if (!downloadInBackground) {
+        {
             if (connect!=null&&userLogged) getNotifs("notifications");
             else message("not connected");
         }
