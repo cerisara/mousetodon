@@ -8,6 +8,8 @@ import android.widget.TextView;
 import android.app.Activity;
 import android.widget.Button;
 import java.util.ArrayList;
+import android.text.TextWatcher;
+import android.text.Editable;
 
 public class UserWritings {
 	static AlertDialog dialog;
@@ -18,6 +20,19 @@ public class UserWritings {
 
         LayoutInflater inflater = LayoutInflater.from(main);
         final View dialogview = inflater.inflate(R.layout.tootinput, null);
+        final TextView txt = (TextView)dialogview.findViewById(R.id.toots);
+
+        txt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                int nchars = s.length();
+                dialog.setTitle("char length: "+Integer.toString(nchars));
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
 
         dialog = new AlertDialog.Builder(main).create();
         dialog.setTitle("Please write your toot");
@@ -26,7 +41,6 @@ public class UserWritings {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        TextView txt = (TextView)dialogview.findViewById(R.id.toots);
                         String u = txt.getText().toString(); 
                         next.run(u);
                     }

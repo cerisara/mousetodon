@@ -233,6 +233,7 @@ public class MouseApp extends Activity {
                             System.out.println("AAAAAAAAAAAAccess "+access_token);
                             message("Login OK");
                             MouseApp.main.userLogged=true;
+                            autoDownload();
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -244,6 +245,13 @@ public class MouseApp extends Activity {
                 }
             });
         }
+    }
+
+    /*
+        start downloading toots automatically in the background
+    */
+    public void autoDownload() {
+
     }
 
     @Override
