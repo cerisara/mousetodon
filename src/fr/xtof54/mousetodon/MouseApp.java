@@ -49,6 +49,9 @@ public class MouseApp extends Activity {
     private DetWebView wvimg;
     private WebView wvjs;
 
+    private TootsManager tootsmgr=null;
+    private boolean downloadInBackground=true;
+
     ArrayList<String> allinstances=new ArrayList<String>();
     int curAccount=0;
     String instanceDomain = "";
@@ -64,6 +67,13 @@ public class MouseApp extends Activity {
     public static ArrayList<Bitmap> imgsinrow = new ArrayList<Bitmap>();
 
     public static DetToot tootselected = null;
+
+    @Override
+    public void onPause() {stopAll();}
+    @Override
+    public void onStop() {stopAll();}
+    @Override
+    public void onDestroy() {stopAll();}
 
     /** Called when the activity is first created. */
     @Override
@@ -247,11 +257,59 @@ public class MouseApp extends Activity {
         }
     }
 
+    public void stopAll() {
+        DetIcons.stopAll();
+        TootsManager.stopAll();
+        tootsmgr=null;
+        jstodownload.clear();
+        try {
+            jstodownload.put(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /*
         start downloading toots automatically in the background
     */
     public void autoDownload() {
-
+        tootsmgr = TootsManager.getTootsManager();
+        Thread displayer = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    while (tootsmgr!=null) {
+                        if (downloadInBackground) {
+                            switch(lastTL) {
+                                case 0: // home
+                                    {
+                                        ArrayList<DetToot> newtts = tootsmgr.getMostRecentToots(instanceDomain,1);
+                                        toots.clear(); toots.addAll(newtts); updateList();
+                                    }
+                                    break;
+                                case 1: // notifs
+                                    {
+                                        ArrayList<DetToot> newtts = tootsmgr.getMostRecentToots(instanceDomain,0);
+                                        toots.clear(); toots.addAll(newtts); updateList();
+                                    }
+                                    break;
+                                case 2: // public
+                                    {
+                                        ArrayList<DetToot> newtts = tootsmgr.getMostRecentToots(instanceDomain,3);
+                                        toots.clear(); toots.addAll(newtts); updateList();
+                                    }
+                                    break;
+                                default: break;
+                            }
+                        }
+                        Thread.sleep(3000);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        lastTL=1; // commence par afficher les notifs
+        displayer.start();
     }
 
     @Override
@@ -452,6 +510,56 @@ public class MouseApp extends Activity {
             message("instance: "+instanceDomain);
         }
     }
+
+    // main buttons
+    public void publicTL(View v) {
+        checkInstance();
+        jstodownload.clear();
+        lastTL=2;
+        maxid=-1;
+        if (!downloadInBackground) {
+            if (connect!=null&&userLogged) getToots("timelines/public");
+            else message("not connected");
+        }
+    }
+    public void homeTL(View v) {
+        checkInstance();
+        jstodownload.clear();
+        lastTL=0;
+        maxid=-1;
+        if (!downloadInBackground) {
+            if (connect!=null&&userLogged) getToots("timelines/home");
+            else message("not connected");
+        }
+    }
+    public void noteTL(View v) {
+        checkInstance();
+        jstodownload.clear();
+        lastTL=1;
+        maxid=-1;
+        if (!downloadInBackground) {
+            if (connect!=null&&userLogged) getNotifs("notifications");
+            else message("not connected");
+        }
+    }
+    public void nextAccount(View v) {
+        jstodownload.clear();
+        if (++curAccount>=allinstances.size()) curAccount=0;
+        SharedPreferences.Editor edit = pref.edit();
+        if (allinstances.size()==0) edit.remove("mouseapp_inst0");
+        else {
+            edit.putString("mouseapp_inst0", allinstances.get(curAccount));
+            message("instance: "+allinstances.get(curAccount));
+        }
+        edit.commit();
+        serverStage0();
+    }
+    public void extramenu(View v) {
+        ExtraMenu.show();
+    }
+
+
+
     public void closeOnetoot(View v) {
         VisuToot.close();
         updateList();
@@ -465,30 +573,7 @@ public class MouseApp extends Activity {
     public void replyhist(View v) {
         showReplyHistory();
     }
-    public void publicTL(View v) {
-        checkInstance();
-        lastTL=2;
-        maxid=-1;
-        if (connect!=null&&userLogged)
-            getToots("timelines/public");
-        else message("not connected");
-    }
-    public void homeTL(View v) {
-        checkInstance();
-        lastTL=0;
-        maxid=-1;
-        if (connect!=null&&userLogged)
-            getToots("timelines/home");
-        else message("not connected");
-    }
-    public void noteTL(View v) {
-        checkInstance();
-        lastTL=1;
-        maxid=-1;
-        if (connect!=null&&userLogged)
-            getNotifs("notifications");
-        else message("not connected");
-    }
+
     public void reply(View v) {
         if (connect==null||!userLogged) {
             message("not connected");
@@ -565,21 +650,6 @@ public class MouseApp extends Activity {
             }
         });
     }
-    public void nextAccount(View v) {
-        if (++curAccount>=allinstances.size()) curAccount=0;
-        SharedPreferences.Editor edit = pref.edit();
-        if (allinstances.size()==0) edit.remove("mouseapp_inst0");
-        else {
-            edit.putString("mouseapp_inst0", allinstances.get(curAccount));
-            message("instance: "+allinstances.get(curAccount));
-        }
-        edit.commit();
-        serverStage0();
-    }
-    public void extramenu(View v) {
-        ExtraMenu.show();
-    }
-
     private NextAction torun = null;
 
     void getStatus(final int id) {
@@ -601,11 +671,27 @@ public class MouseApp extends Activity {
 
     void getNotifs(final String tl) {
         startWaitingWindow("Getting notifs...");
+        getNotifs(tl, new TootsListener() {
+            boolean isFirstCall = true;
+            // attention: avec getNotifs, cette fonction est appelee plusieurs fois !
+            public void gotNewToots(ArrayList<DetToot> newtoots) {
+                if (isFirstCall) {
+                    stopWaitingWindow();
+                    isFirstCall=false;
+                }
+                toots.clear();
+                toots.addAll(newtoots);
+                updateList();
+            }
+        });
+    }
+ 
+    void getNotifs(final String tl, final TootsListener action2) {
         connect.getTL(tl,new NextAction() {
             public void run(String res) {
                 try {
+                    final ArrayList<DetToot> restoots = new ArrayList<DetToot>();
                     JSONArray json = new JSONArray(res);
-                    if (resetTL) toots.clear();
 
                     // just pre-download list of notifications
                     ArrayList<Integer> idx = new ArrayList<Integer>();
@@ -617,18 +703,18 @@ public class MouseApp extends Activity {
                             JSONObject toot =o.getJSONObject("status");
                             int id = toot.getInt("id");
                             DetToot dt = new DetToot("mention: "+Integer.toString(id));
-                            idx.add(toots.size());
+                            idx.add(restoots.size());
                             ids.add(id);
-                            toots.add(dt);
+                            restoots.add(dt);
                         } else if (typ.equals("follow")) {
                             if (!o.isNull("account")) {
                                 JSONObject acc = o.getJSONObject("account");
                                 String aut = acc.getString("username")+": ";
                                 DetToot dt = new DetToot("followed by: "+aut);
-                                toots.add(dt);
+                                restoots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);
-                                toots.add(dt);
+                                restoots.add(dt);
                             }
                         } else if (typ.equals("favourite")) {
                             if (!o.isNull("account")) {
@@ -636,10 +722,10 @@ public class MouseApp extends Activity {
                                 String aut = acc.getString("username")+": ";
                                 DetToot dt = new DetToot("favourite by: "+aut);
                                 dt.txt+=dt.getText(o.getJSONObject("status"),false);
-                                toots.add(dt);
+                                restoots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);
-                                toots.add(dt);
+                                restoots.add(dt);
                             }
                         } else if (typ.equals("reblog")) {
                             if (!o.isNull("account")) {
@@ -647,26 +733,26 @@ public class MouseApp extends Activity {
                                 String aut = acc.getString("username")+": ";
                                 DetToot dt = new DetToot("reblog by: "+aut);
                                 dt.txt+=dt.getText(o.getJSONObject("status"),false);
-                                toots.add(dt);
+                                restoots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);
-                                toots.add(dt);
+                                restoots.add(dt);
                             }
                         } else {
                             DetToot dt = new DetToot("unhandled type: "+typ);
-                            toots.add(dt);
+                            restoots.add(dt);
                         }
                     }
 
-                    // now download all statutes asynchronously in the background
+                    // now download all statutes
                     for (int i=0;i<ids.size();i++) {
                         final int ii = idx.get(i);
                         connect.getOneStatus(ids.get(i), new NextAction() {
                             public void run(String res) {
                                 try {
                                     JSONObject o = new JSONObject(res);
-                                    toots.set(ii,new DetToot(o,detectlang));
-                                    updateList();
+                                    restoots.set(ii,new DetToot(o,detectlang));
+                                    action2.gotNewToots(restoots);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -675,8 +761,6 @@ public class MouseApp extends Activity {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    stopWaitingWindow();
                 }
             }
         });
@@ -713,30 +797,38 @@ public class MouseApp extends Activity {
     }
     void getToots(final String tl) {
         startWaitingWindow("Getting toots... "+Integer.toString(maxid));
+        getToots(tl, new TootsListener() {
+            public void gotNewToots(ArrayList<DetToot> newtoots) {
+                stopWaitingWindow();
+                if (resetTL) toots.clear();
+                toots.addAll(newtoots);
+                updateList();
+            }
+        });
+    }
+    public void getToots(final String tl, final TootsListener action2) {
         connect.getTL(tl,new NextAction() {
             public void run(String res) {
                 try {
+                    ArrayList<DetToot> restoots = new ArrayList<DetToot>();
                     JSONArray json = new JSONArray(res);
                     System.out.println("GOTTOOTS "+Integer.toString(json.length()));
-                    if (resetTL) toots.clear();
                     for (int i=0;i<json.length();i++) {
                         JSONObject o = (JSONObject)json.get(i);
                         DetToot dt = new DetToot(o,detectlang);
-                        if (dt.lang==null || filterlangs==null) toots.add(dt);
+                        if (dt.lang==null || filterlangs==null) restoots.add(dt);
                         else {
                             for (String s: filterlangs) {
                                 if (s.equals(dt.lang)) {
-                                    toots.add(dt);
+                                    restoots.add(dt);
                                     break;
                                 }
                             }
                         }
                     }
-                    updateList();
+                    action2.gotNewToots(restoots);
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    stopWaitingWindow();
                 }
             }
         });

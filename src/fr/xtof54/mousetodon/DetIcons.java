@@ -62,6 +62,15 @@ public class DetIcons {
         }
     }
 
+    public static void stopAll() {
+        try {
+            todownload.clear();
+            todownload.put(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void downloadImg(DetToot toot, String avatar, String username) {
         try {
             if (downloader==null) {
