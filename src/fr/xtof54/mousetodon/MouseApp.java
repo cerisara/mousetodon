@@ -243,7 +243,7 @@ public class MouseApp extends Activity {
                             System.out.println("AAAAAAAAAAAAccess "+access_token);
                             message("Login OK");
                             MouseApp.main.userLogged=true;
-                            autoDownload();
+                            // autoDownload();
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
