@@ -15,6 +15,10 @@ public class DetIcons {
     private static final Object[] finfin = {null};
     private static Thread downloader = null;
 
+    public static void init() {
+        todownload.clear();
+    }
+
     private static File getOutputMediaFile(String url){
 
         // To be safe, you should check that the SDCard is mounted
@@ -101,6 +105,7 @@ public class DetIcons {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        downloader=null;
                     }
                 });
                 downloader.start();

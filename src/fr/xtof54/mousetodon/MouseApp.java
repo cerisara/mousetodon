@@ -75,12 +75,24 @@ public class MouseApp extends Activity {
     public void onStop() {super.onStop(); stopAll();}
     @Override
     public void onDestroy() {super.onDestroy(); stopAll();}
+    @Override
+    public void onStart() {super.onStart(); jstodownload.clear(); DetIcons.init();}
+    @Override
+    public void onRestart() {super.onRestart(); jstodownload.clear(); DetIcons.init();}
+    @Override
+    public void onResume() {
+        super.onResume();
+        jstodownload.clear();
+        DetIcons.init();
+        serverStage0();
+    }
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MouseApp.main=this;
+        jstodownload.clear(); DetIcons.init();
         setContentView(R.layout.main);
         pref = getSharedPreferences("MouseApp", MODE_PRIVATE);
         ArrayList<String> tmp = new ArrayList<String>();
@@ -118,7 +130,6 @@ public class MouseApp extends Activity {
         wvjs.setWebViewClient(connect);
         wvjs.addJavascriptInterface(new MyJavaScriptInterface(), "INTERFACE"); 
 
-        serverStage0();
     }
 
     public void serverStage0() {
@@ -916,6 +927,7 @@ public class MouseApp extends Activity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        jsdownloader=null;
                     }
                 });
                 jsdownloader.start();
