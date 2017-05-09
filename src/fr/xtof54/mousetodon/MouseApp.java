@@ -632,6 +632,10 @@ public class MouseApp extends Activity {
             }
         });
     }
+    public void share(View v) {
+        // TODO
+        // copy the URL to one toot so that it can be pasted later on in the app or outside
+    }
     public void quit(View v) {
     }
     public void follow(final View v) {
