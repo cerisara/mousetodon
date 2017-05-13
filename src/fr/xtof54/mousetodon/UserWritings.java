@@ -22,6 +22,8 @@ public class UserWritings {
         final View dialogview = inflater.inflate(R.layout.tootinput, null);
         final TextView txt = (TextView)dialogview.findViewById(R.id.toots);
 
+        if (MouseApp.main.tootselected!=null) txt.setText("@"+MouseApp.main.tootselected.username+" ");
+
         txt.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {

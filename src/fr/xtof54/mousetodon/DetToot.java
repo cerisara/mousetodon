@@ -27,6 +27,7 @@ public class DetToot {
     public int autid=-1;
     public String date=""; // formatted in ISO 8601
     ArrayList<String> medias = new ArrayList<String>();
+    public String tooturl = "";
 
     private static HashMap<Integer,DetToot> alltoots = new HashMap<Integer,DetToot>();
     public static void checkImages() {
@@ -78,6 +79,8 @@ public class DetToot {
                 }
 
                 if (!json.isNull("created_at")) date=json.getString("created_at");
+
+                if (!json.isNull("url")) tooturl=json.getString("url");
 
                 if (!json.isNull("in_reply_to_id")) parentid=json.getInt("in_reply_to_id");
 

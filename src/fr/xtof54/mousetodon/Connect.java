@@ -202,7 +202,11 @@ webView.loadData(data, "text/HTML", "UTF-8");
             String parms = "status="+URLEncoder.encode(s, "UTF-8");
             if (origintoot!=null && origintoot.id>=0) {
                 System.out.println("replying to toot "+Integer.toString(origintoot.id));
-                parms += "&in_reply_to_id="+Integer.toString(origintoot.id);
+                // don't use any more the reply link, because it prevents posting the toot on the public timeline.
+                // parms += "&in_reply_to_id="+Integer.toString(origintoot.id);
+                // so rather insert a link to the previous toot if there's enough space
+                String ss = s+"\n"+"Replied to: "+origintoot.tooturl;
+                if (ss.length()<500) parms="status="+URLEncoder.encode(ss, "UTF-8");
             }
             final String js = "var xhr = new XMLHttpRequest(); "+
                 "xhr.open('POST', '"+surl+"', true); "+
@@ -250,6 +254,21 @@ webView.loadData(data, "text/HTML", "UTF-8");
             visibility (optional): either "direct", "private", "unlisted" or "public"
             */
     }
+    public void reblog(int id, NextAction next) {
+        Log.d("Connect","Reblog");
+        String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id)+"/reblog", domain);
+        final String js = "var xhr = new XMLHttpRequest(); "+
+            "xhr.open('POST', '"+surl+"', true); "+
+            "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'); "+
+            "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+
+            "xhr.onload = function () { window.INTERFACE.processContent('DETOK '+this.responseText); }; "+
+            "function deterror(evt) { window.INTERFACE.processContent('DETKO'); }; "+
+            "xhr.addEventListener('error', deterror); "+
+            "xhr.send(null); ";
+        System.out.println("SENDJS "+js);
+        MouseApp.javascriptCmd("javascript:"+js,next);
+    }
+
     public void boost(int id, NextAction next) {
         Log.d("Connect","Boost");
         String surl = String.format("https://%s/api/v1/statuses/"+Integer.toString(id)+"/favourite", domain);

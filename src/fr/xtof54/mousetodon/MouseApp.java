@@ -26,6 +26,7 @@ import android.content.DialogInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.util.concurrent.LinkedBlockingQueue;
+import android.content.Context;
 
 public class MouseApp extends Activity {
     public static MouseApp main=null;
@@ -633,10 +634,32 @@ public class MouseApp extends Activity {
         });
     }
     public void share(View v) {
-        // TODO
-        // copy the URL to one toot so that it can be pasted later on in the app or outside
+        if (tootselected!=null && tootselected.tooturl!=null) {
+            android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            clipboard.setText(tootselected.tooturl);
+            // ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE); 
+            // ClipData clip = ClipData.newPlainText("MouseApp toot", tootselected.tooturl);
+            // clipboard.setPrimaryClip(clip);
+            message("Toot URL is now in clipboard !");
+        } else {
+            message("Cannot reblog: no toot id");
+        }
     }
     public void quit(View v) {
+    }
+    public void reblog(View v) {
+        if (tootselected!=null) {
+            startWaitingWindow("Rebloging toot...");
+            connect.reblog(tootselected.id, new NextAction() {
+                public void run(String res) {
+                    stopWaitingWindow();
+                    // TODO check if error here
+                    message("Message reblogged !");
+                }
+            });
+        } else {
+            message("Cannot reblog: no toot id");
+        }
     }
     public void follow(final View v) {
         final NextAction dumbaction = new NextAction() {
