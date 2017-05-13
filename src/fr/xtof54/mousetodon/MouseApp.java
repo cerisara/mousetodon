@@ -629,6 +629,7 @@ public class MouseApp extends Activity {
             message("not connected");
             return;
         }
+        tootselected=null;
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

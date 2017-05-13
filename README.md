@@ -1,10 +1,10 @@
 
 ![Mousetodon](./mousetodon.jpg)
 
-This is an application for reading Mastodon toots.
+MouseApp is an android client for the Mastodon social network.
 
-Mousetodon is in development stage for now, but it should already fulfill the most basic interactions with any Mastodon server you may expect from an android app.
-As compared to the other available android apps, Mousetodon is certainly not as nice and visually attractive (because it's not a priority for me),
+MouseApp is in development stage for now, but it should already fulfill the most basic interactions with any Mastodon server you may expect from an android app.
+As compared to the other available android apps, MouseApp is certainly not as nice and visually attractive (because it's not a priority for me),
 but it has other advantages depicted below.
 Its most noticeable features, which makes it different from the other apps, are:
 
@@ -51,7 +51,7 @@ This popup window also gives you the option to reply to this toot, boost or unbo
 
 ## How to build
 
-Contrary to other apps, building Mousetodon is very simple, because my objective is to be able
+Contrary to other apps, building MouseApp is very simple, because my objective is to be able
 to build it even from within an android device itself !
 So you don't need heavy IDE like Virtual Studio, nor even internet connections, as there's no external dependencies.
 You just need the Java JDK, an Android SDK and the good old ANT build system.
@@ -110,9 +110,9 @@ The problem is that secure connection with a Mastodon instance can be configured
 I don't see what can done in the app to fix that) with various TLS protocols, and that from one version to another,
 the core Android libraries implement in very different ways these protocols, and sometimes, it just does not work.
 
-Note that the current default version 0.8 of Mousetodon application is also affected by this issue, but a new version of
-the Mousetodon application has been built to solve this issue: it is not yet available on F-droid, but you can already find
-it in github in the branch *webview*. The solution adopted consists in removing the faulty HttpUrlConnection class to
+Note that version 0.8 of MouseApp application is also affected by this issue, but the new version 0.9 of
+the MouseApp application has been built to solve this issue.
+The solution adopted consists in removing the faulty HttpUrlConnection class to
 communicate with the Mastodon API server and replacing it with javascript.
 
 -------------
@@ -143,6 +143,5 @@ a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and 
 
 ### Features to be implemented next:
 
-- get details and toots from a user account
 - quick-toot from outside the app with *share as* thanks to TaskLabAct
 
