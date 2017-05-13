@@ -164,5 +164,6 @@ a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and 
 
 ### Features to be implemented next:
 
+- search
 - quick-toot from outside the app with *share as* thanks to TaskLabAct
 

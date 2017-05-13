@@ -10,30 +10,11 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     >
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Notifs"
-        android:onClick="noteTL"
-        />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Home"
-        android:onClick="homeTL"
-        />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Local"
-        android:onClick="localTL"
-        />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Public"
-        android:onClick="publicTL"
-        />
+    <Spinner
+         android:id="@+id/spinner"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content" />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -51,10 +32,8 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_height="wrap_content"
         android:text="..."
-        android:layout_alignParentRight="true"
         android:onClick="extramenu"
         />
-
 
 </LinearLayout>
 

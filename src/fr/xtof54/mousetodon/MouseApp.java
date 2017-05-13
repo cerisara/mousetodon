@@ -27,6 +27,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.util.concurrent.LinkedBlockingQueue;
 import android.content.Context;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 public class MouseApp extends Activity {
     public static MouseApp main=null;
@@ -115,6 +118,32 @@ public class MouseApp extends Activity {
                 }
             }
         });
+
+        {
+            Spinner spinner = (Spinner)findViewById(R.id.spinner);
+            String[] items = new String[]{"TL","Notifs", "Home", "Local", "Feder"};
+            ArrayAdapter<String> spinadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
+            spinner.setAdapter(spinadapter);
+            spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+                    switch(position) {
+                        case 0: break;
+                        case 1: noteTL(null);
+                            break;
+                        case 2: homeTL(null);
+                            break;
+                        case 3: localTL(null);
+                            break;
+                        case 4: publicTL(null);
+                            break;
+                    }
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {}
+            });
+        }
+
 
         File d = getExternalCacheDir();
         File mouseappdir = new File(d, "mouseappdir");
