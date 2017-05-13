@@ -128,7 +128,6 @@ webView.loadData(data, "text/HTML", "UTF-8");
     public void getTL(final String tl, final NextAction next) {
         Log.d("Connect","getTL");
         String surl = String.format("https://%s/api/v1/"+tl, domain);
-        if (MouseApp.main.maxid>=0) surl = String.format("https://%s/api/v1/"+tl+"?max_id="+Integer.toString(MouseApp.main.maxid), domain);
         final String js = "var xhr = new XMLHttpRequest(); "+
             "xhr.open('GET', '"+surl+"', true); "+
             "xhr.setRequestHeader('Authorization', 'Bearer "+MouseApp.access_token+"'); "+

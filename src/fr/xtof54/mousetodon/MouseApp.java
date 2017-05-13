@@ -36,7 +36,6 @@ public class MouseApp extends Activity {
 
     public boolean appRegistered=false;
     public boolean userLogged=false;
-    public int maxid=-1;
     public int lastTL=-1;
 
     private static LinkedBlockingQueue<Object[]> jstodownload = new LinkedBlockingQueue<Object[]>();
@@ -311,6 +310,12 @@ public class MouseApp extends Activity {
                                         toots.clear(); toots.addAll(newtts); updateList();
                                     }
                                     break;
+                                case 3: // local
+                                    {
+                                        ArrayList<DetToot> newtts = tootsmgr.getMostRecentToots(instanceDomain,2);
+                                        toots.clear(); toots.addAll(newtts); updateList();
+                                    }
+                                    break;
                                 default: break;
                             }
                         }
@@ -498,19 +503,22 @@ public class MouseApp extends Activity {
     }
 
     public void getOlderToots() {
+        int maxid=-1;
         for (int i=toots.size()-1;i>=0;i--)
             if (toots.get(i).id>=0) {
                 maxid=toots.get(i).id-1;
                 break;
             }
-        if (connect!=null&&userLogged)
+        if (connect!=null&&userLogged&&maxid>=0)
             switch(lastTL) {
                 case 0: 
-                    getToots("timelines/home"); break;
+                    getToots("timelines/home?&max_id="+maxid); break;
                 case 1: 
-                    getNotifs("notifications"); break;
+                    getNotifs("notifications?&max_id="+maxid); break;
                 case 2: 
-                    getToots("timelines/public"); break;
+                    getToots("timelines/public?&max_id="+maxid); break;
+                case 3: 
+                    getToots("timelines/public?local=1&max_id="+maxid); break;
                 default:
                     message("ERROR OLDER TOOTS");
             }
@@ -529,9 +537,17 @@ public class MouseApp extends Activity {
         checkInstance();
         jstodownload.clear();
         lastTL=2;
-        maxid=-1;
         {
             if (connect!=null&&userLogged) getToots("timelines/public");
+            else message("not connected");
+        }
+    }
+    public void localTL(View v) {
+        checkInstance();
+        jstodownload.clear();
+        lastTL=3;
+        {
+            if (connect!=null&&userLogged) getToots("timelines/public?local=1");
             else message("not connected");
         }
     }
@@ -539,7 +555,6 @@ public class MouseApp extends Activity {
         checkInstance();
         jstodownload.clear();
         lastTL=0;
-        maxid=-1;
         {
             if (connect!=null&&userLogged) getToots("timelines/home");
             else message("not connected");
@@ -549,7 +564,6 @@ public class MouseApp extends Activity {
         checkInstance();
         jstodownload.clear();
         lastTL=1;
-        maxid=-1;
         {
             if (connect!=null&&userLogged) getNotifs("notifications");
             else message("not connected");
@@ -837,7 +851,7 @@ public class MouseApp extends Activity {
         }
     }
     void getToots(final String tl) {
-        startWaitingWindow("Getting toots... "+Integer.toString(maxid));
+        startWaitingWindow("Getting toots... ");
         getToots(tl, new TootsListener() {
             public void gotNewToots(ArrayList<DetToot> newtoots) {
                 stopWaitingWindow();

@@ -133,6 +133,11 @@ a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and 
 - Smoother icon loading in the background, with caching
 - Support added for following user 
 
+### v0.10
+
+- reblog
+- change reply button: don't link in the metadata, but rather adds @-mention + the URL of the original toot: hence, the reply is also published in the public timeline.
+
 -------------
 
 ### Features to be implemented next:
