@@ -31,21 +31,38 @@ Current limitations:
 
 At the first connection, the app will pop up a window asking for a Mastodon instance (without the http:// prefix, so just type in something like *mastodon.social*),
 your email and password on this instance.
-You then see 3 buttons on the top left, respectively for showing your notifications, your home timeline and the federated public timeline.
+In the top left, you can see several buttons:
 
-The 4th button allow you to toot a message, and the 5th button gives you the option to switch to the next known instance.
-Initially, you should only have defined a single instance, but you can later on easily add another one via the application menu (3 little dots at the bottom right on
-"old" Android devices), item "+Account".
+- *Notifs* shows your most recent notifications
+- *Home* shows your most recent home timeline
+- *Local* shows the most recent local timeline of your logged-in instance (the one printed in the title bar)
+- *Public* shows the most recent federated timeline
+- press *Toot* to write and publish a toot
+- press *XIn* to switch to another saved account
+- press the last smaller button *...* to access other functionalities
+
+Initially, you should only have defined a single instance, but you can later on easily add other ones via the application menu 
+or the *...* button and then *add account* sub-menu.
 Another item in the application menu allows you to switch on and off language detection+filtering, and define the languages to show:
 use the two-letter codes (fr en sp ge ja) separated by whitespace.
 
 Any timeline shows a list of toots, with a picture of the sender on the left, and some technical information on top
-(the date, whether you have boosted this toot (with a star), the sender name).
+(the date, whether you have boosted this toot (with a heart emoji), the sender name).
 At the bottom of the list, you have the option to download older toots.
 
-If you click on any of these toots, a popup windows appears that shows all the medias and URLs links from the toot:
-now, if you click on one of these media/URLs, it is opened with the appropriate Android application.
-This popup window also gives you the option to reply to this toot, boost or unboost it.
+If you click on any of these toots, a popup windows appears that shows all the medias and URLs links from the toot.
+This popup also gives you new actions with respect to the currently selected toot:
+
+- reply
+- boost
+- *parents* shows you the "reply-to" thread
+- *infos* shows opens a new popup with all the toots published by this user
+- *copy* copies the URL of this toot into the Android clipboard
+- *reblog* this toot
+
+Also, if you click on one of the listed media/URLs, it is opened in a browser.
+
+The user informations obtained via the *infos* button also gives you the option to *follow*/*unfollow* this user.
 
 -----------
 
