@@ -3,7 +3,7 @@
 
 MouseApp is an android client for the Mastodon social network.
 
-###You must create 1 or several Mastodon accounts before you can use this app !
+### You must create 1 or several Mastodon accounts before you can use this app !
 
 The app does not let you register onto a Mastodon instance: it assumes the accounts already exist and are configured.
 
