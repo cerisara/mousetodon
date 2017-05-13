@@ -15,6 +15,34 @@ public class UserWritings {
 	static AlertDialog dialog;
 	static NextAction next;
 
+    public static void show4tags(Activity main, final NextAction next) {
+	    LangInput.next=next;
+
+        LayoutInflater inflater = LayoutInflater.from(main);
+        final View dialogview = inflater.inflate(R.layout.tootinput, null);
+        final TextView txt = (TextView)dialogview.findViewById(R.id.toots);
+
+        dialog = new AlertDialog.Builder(main).create();
+        dialog.setTitle("Search tag ?");
+        dialog.setView(dialogview);
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        String u = txt.getText().toString(); 
+                        next.run(u);
+                    }
+                });
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE,"Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        next.run("");
+                    }
+                });
+        dialog.show();
+    }
+
     public static void show(Activity main, final NextAction next) {
 	    LangInput.next=next;
 

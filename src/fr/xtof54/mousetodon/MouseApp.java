@@ -1,6 +1,7 @@
 package fr.xtof54.mousetodon;
 
 import android.app.Activity;
+import java.net.URLEncoder;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.content.SharedPreferences;
@@ -55,6 +56,7 @@ public class MouseApp extends Activity {
 
     private TootsManager tootsmgr=null;
     private boolean downloadInBackground=true;
+    private String tags="";
 
     ArrayList<String> allinstances=new ArrayList<String>();
     int curAccount=0;
@@ -121,7 +123,7 @@ public class MouseApp extends Activity {
 
         {
             Spinner spinner = (Spinner)findViewById(R.id.spinner);
-            String[] items = new String[]{"TL","Notifs", "Home", "Local", "Feder"};
+            String[] items = new String[]{"TL","Notifs", "Home", "Local", "Feder", "Search"};
             ArrayAdapter<String> spinadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
             spinner.setAdapter(spinadapter);
             spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -136,6 +138,8 @@ public class MouseApp extends Activity {
                         case 3: localTL(null);
                             break;
                         case 4: publicTL(null);
+                            break;
+                        case 5: tagTL();
                             break;
                     }
                 }
@@ -345,6 +349,12 @@ public class MouseApp extends Activity {
                                         toots.clear(); toots.addAll(newtts); updateList();
                                     }
                                     break;
+                                case 4: // tag
+                                    {
+                                        ArrayList<DetToot> newtts = tootsmgr.getMostRecentToots(instanceDomain,4);
+                                        toots.clear(); toots.addAll(newtts); updateList();
+                                    }
+                                    break;
                                 default: break;
                             }
                         }
@@ -548,6 +558,8 @@ public class MouseApp extends Activity {
                     getToots("timelines/public?&max_id="+maxid); break;
                 case 3: 
                     getToots("timelines/public?local=1&max_id="+maxid); break;
+                case 4: 
+                    getToots("timelines/tag/"+tags+"?max_id="+maxid); break;
                 default:
                     message("ERROR OLDER TOOTS");
             }
@@ -570,6 +582,22 @@ public class MouseApp extends Activity {
             if (connect!=null&&userLogged) getToots("timelines/public");
             else message("not connected");
         }
+    }
+    public void tagTL() {
+        checkInstance();
+        jstodownload.clear();
+        lastTL=4;
+        UserWritings.show4tags(MouseApp.main, new NextAction() {
+            public void run(String s) {
+                try {
+                    tags = URLEncoder.encode(s, "UTF-8");
+                    if (connect!=null&&userLogged) getToots("timelines/tag/"+tags);
+                    else message("not connected");
+                } catch (Exception e) {
+                    message("Error encoding");
+                }
+            }
+        });
     }
     public void localTL(View v) {
         checkInstance();

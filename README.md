@@ -160,11 +160,11 @@ a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and 
 - added local timeline
 - change reply button: don't link in the metadata, but rather adds @-mention + the URL of the original toot: hence, the reply is also published in the public timeline.
 - drop-down menu for timelines: much better for smaller screens
+- search for tags
 
 -------------
 
 ### Features to be implemented next:
 
-- search
 - quick-toot from outside the app with *share as* thanks to TaskLabAct
 
