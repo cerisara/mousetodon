@@ -16,7 +16,9 @@ Its most noticeable features, which makes it different from the other apps, are:
 For now, only the following languages can be detected: French (fr), English (en), Spanish (sp), German (ge) and Japanese-Chinese-Korean (ja) (I know, sorry, these 3 languages are very different, but I'm no expert in them and I'll do my best to improve them in a later release, or
 hopefully before thanks to a merge request).
 - **multiple accounts/instances** support, with fast switching between them with one-click.
-- Open-source and not dependent on any 3rd-party library, especially Google ones.
+- Optionally, **read aloud** only the English toots
+- Low-end device friendly (from **Android 2.3+**)
+- **lightweight**, robust to SSL Android bug
 
 Current limitations:
 
