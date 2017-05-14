@@ -636,6 +636,8 @@ public class MouseApp extends Activity {
             message("instance: "+allinstances.get(curAccount));
         }
         edit.commit();
+        Spinner spinner = (Spinner)findViewById(R.id.spinner);
+        spinner.setSelection(0,false);
         serverStage0();
     }
     public void extramenu(View v) {
