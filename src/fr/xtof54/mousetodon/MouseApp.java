@@ -757,9 +757,8 @@ public class MouseApp extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                int userid = tootselected.autid;
                 VisuToot.close();
-                VisuUser.show(userid);
+                VisuUser.show(tootselected);
             }
         });
     }
@@ -831,10 +830,9 @@ public class MouseApp extends Activity {
                             }
                         } else if (typ.equals("favourite")) {
                             if (!o.isNull("account")) {
-                                JSONObject acc = o.getJSONObject("account");
-                                String aut = acc.getString("username")+": ";
-                                DetToot dt = new DetToot("favourite by: "+aut);
-                                dt.txt+=dt.getText(o.getJSONObject("status"),false);
+                                DetToot dt = new DetToot("favourite by: ");
+                                dt.getExtraInfos(o);
+                                dt.txt+=dt.username+"\n"+dt.getText(o.getJSONObject("status"),false);
                                 restoots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);

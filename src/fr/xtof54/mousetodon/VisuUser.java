@@ -31,8 +31,8 @@ public class VisuUser {
             dialog=null;
         }
     }
-    public static void show(final int userid) {
-        curuserid = userid;
+    public static void show(final DetToot user) {
+        curuserid = user.autid;
         Activity main = MouseApp.main;
 
         LayoutInflater inflater = LayoutInflater.from(main);
@@ -44,7 +44,7 @@ public class VisuUser {
         tootlist.clear();
 
         dialog = new AlertDialog.Builder(main).create();
-        dialog.setTitle("User infos");
+        dialog.setTitle("User "+user.username);
         dialog.setView(dialogview);
         dialog.show();
 
@@ -81,7 +81,7 @@ public class VisuUser {
 
 
             MouseApp.main.startWaitingWindow("downloading user toots");
-            MouseApp.main.connect.getUserToots(userid, new NextAction() {
+            MouseApp.main.connect.getUserToots(curuserid, new NextAction() {
                 public void run(final String res) {
                     MouseApp.main.stopWaitingWindow();
                     MouseApp.main.runOnUiThread(new Runnable() {

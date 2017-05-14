@@ -62,20 +62,18 @@ public class DetToot {
         return usericon;
     }
 
-    private void getExtraInfos(JSONObject json) {
+    public void getExtraInfos(JSONObject json) {
         medias.clear();
         if (json!=null) {
             try {
-                id = json.getInt("id");
+                if (!json.isNull("id")) id = json.getInt("id");
 
                 if (!json.isNull("account")) {
                     JSONObject acc = json.getJSONObject("account");
                     username = acc.getString("acct");
-                    String avatar = acc.getString("avatar");
                     if (!acc.isNull("id")) autid=acc.getInt("id");
-                    if (avatar!=null && avatar.startsWith("http")) {
-                        usericonurl=avatar;
-                    }
+                    String avatar = acc.getString("avatar");
+                    if (avatar!=null && avatar.startsWith("http")) usericonurl=avatar;
                 }
 
                 if (!json.isNull("created_at")) date=json.getString("created_at");
