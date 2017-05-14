@@ -8,6 +8,8 @@ import java.util.TimeZone;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import android.text.Html;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -18,7 +20,7 @@ import java.util.Date;
 public class DetToot {
     static LangDetect langdetect = null;
     static boolean langdetectpossible = true;
-    String txt, lang=null;
+    public String txt, lang=null;
     public int id=-1, parentid=-1;
     public boolean boosted = false;
     private Bitmap usericon=null;
@@ -161,6 +163,26 @@ public class DetToot {
         if (lang!=null) attrs+=" ("+lang+")";
         if (attrs.length()>0) return "<p>"+attrs+"</p>"+txt.trim();
         else return txt.trim();
+    }
+    // used for TTS
+    public String getOnlyStr() {
+        String s = txt;
+        s = s.replaceAll("<[^>]*>","");
+        s = s.replaceAll("http\\S+","");
+        s = s.replaceAll("#","");
+        String[] ss = s.split(" ");
+        s="";
+        for (int i=0;i<ss.length;i++) {
+            int j=ss[i].indexOf("/");
+            if (j<0) s+=ss[i]+" ";
+        }
+        s = Html.fromHtml(s).toString();
+        return s.trim();
+    }
+    public String getOnlyUser() {
+        int i=username.lastIndexOf("@");
+        if (i>0) return username.substring(0,i);
+        else return username;
     }
 }
 

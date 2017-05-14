@@ -36,7 +36,7 @@ public class MouseApp extends Activity {
     public static MouseApp main=null;
     public static String access_token=null;
     public static String tmpfiledir=null;
-    private boolean detectlang = false, resetTL = true;
+    public boolean detectlang = false, resetTL = true;
 
     public boolean appRegistered=false;
     public boolean userLogged=false;
@@ -46,6 +46,8 @@ public class MouseApp extends Activity {
     private static final Object[] finfin = {null};
     private static Thread jsdownloader = null;
     static String[] waitres = {null};
+
+    public TTS tts = null;
 
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
     ArrayList<DetToot> savetoots = new ArrayList<DetToot>();
@@ -114,6 +116,7 @@ public class MouseApp extends Activity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            if (tts!=null) tts.silence();
                             VisuToot.show(tootselected);
                         }
                     });
@@ -916,6 +919,7 @@ public class MouseApp extends Activity {
                 if (resetTL) toots.clear();
                 toots.addAll(newtoots);
                 updateList();
+                if (tts!=null) tts.list2read(toots);
             }
         });
     }

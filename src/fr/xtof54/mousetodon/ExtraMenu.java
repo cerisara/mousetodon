@@ -55,6 +55,8 @@ public class ExtraMenu {
         ArrayList<String> actions = new ArrayList<String>();
         actions.add("clear cache");
         actions.add("add account");
+        if (MouseApp.main.tts==null) actions.add("start TTS");
+        else actions.add("stop TTS");
 
         ArrayAdapter adapt = new ArrayAdapter(MouseApp.main, R.layout.rowmenu, actions);
         if (adapt==null) MouseApp.main.message("ERROR extra actions");
@@ -68,6 +70,7 @@ public class ExtraMenu {
                     switch (pos) {
                         case 0: clearCache(); break;
                         case 1: MouseApp.main.addAccount(); break;
+                        case 2: TTS.startorstop(); break;
                     }
                 }
             });

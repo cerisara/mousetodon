@@ -155,6 +155,7 @@ a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and 
 - change reply button: don't link in the metadata, but rather adds @-mention + the URL of the original toot: hence, the reply is also published in the public timeline.
 - drop-down menu for timelines: much better for smaller screens
 - search for tags
+- Reading aloud (TTS) English-only toots
 
 -------------
 
