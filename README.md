@@ -18,16 +18,10 @@ hopefully before thanks to a merge request).
 - **multiple accounts/instances** support, with fast switching between them with one-click.
 - Open-source and not dependent on any 3rd-party library, especially Google ones.
 
-Target features not implement yet:
-
-- Search in toots
-- Various language advanced features (words clouds, clustering...) (I'm in NLP after all !)
-
 Current limitations:
 
-- Does not show user details
-- Does not allow (yet) to reblog (in progress... but you can boost !)
 - Does not support content warnings, nor media uploads
+- Does not show some user details
 
 -----------
 
