@@ -1,12 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/reset"
-        android:title="Reset Client"/>
-    <item
-        android:id="@+id/otherCreds"
-        android:title="+Account"/>
-    <item
         android:id="@+id/nolang"
         android:title="Switch lang detect"/>
     <item

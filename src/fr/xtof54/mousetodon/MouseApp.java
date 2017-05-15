@@ -61,7 +61,6 @@ public class MouseApp extends Activity {
     private String tags="";
 
     ArrayList<String> allinstances=new ArrayList<String>();
-    int curAccount=0;
     String instanceDomain = "";
     Connect connect=null;
 
@@ -91,7 +90,6 @@ public class MouseApp extends Activity {
         super.onResume();
         jstodownload.clear();
         DetIcons.init();
-        serverStage0();
     }
 
     /** Called when the activity is first created. */
@@ -132,18 +130,57 @@ public class MouseApp extends Activity {
             spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
-                    switch(position) {
-                        case 0: break;
-                        case 1: noteTL(null);
-                            break;
-                        case 2: homeTL(null);
-                            break;
-                        case 3: localTL(null);
-                            break;
-                        case 4: publicTL(null);
-                            break;
-                        case 5: tagTL();
-                            break;
+                    if (instanceDomain==null && position>0) message("Login first !");
+                    else {
+                        switch(position) {
+                            case 0: break;
+                            case 1: noteTL(null);
+                                break;
+                            case 2: homeTL(null);
+                                break;
+                            case 3: localTL(null);
+                                break;
+                            case 4: publicTL(null);
+                                break;
+                            case 5: tagTL();
+                                break;
+                        }
+                    }
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {}
+            });
+        }
+
+        {
+            String s = pref.getString("mouseapp_insts", null);
+            if (s!=null) {
+                String[] ss = s.split(" ");
+                allinstances.clear();
+                for (String x: ss) allinstances.add(x);
+            }
+            instanceDomain = null;
+
+            Spinner spinner = (Spinner)findViewById(R.id.spinneracc);
+            ArrayList<String> items = new ArrayList<String>();
+            items.add("No instance");
+            for (String x: allinstances) items.add(x);
+            items.add("+ New Account");
+            ArrayAdapter<String> spinadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
+            spinner.setAdapter(spinadapter);
+            spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+                    jstodownload.clear();
+                    Spinner spin = (Spinner)findViewById(R.id.spinner);
+                    spin.setSelection(0,false);
+                    if (position==allinstances.size()+1) {
+                        addAccount();
+                    } else if (position==0) {
+                        instanceDomain=null;
+                    } else {
+                        instanceDomain = allinstances.get(position-1);
+                        serverStage1();
                     }
                 }
                 @Override
@@ -168,59 +205,8 @@ public class MouseApp extends Activity {
 
     }
 
-    public void serverStage0() {
-        // check if we know the instance
-        String s = pref.getString("mouseapp_insts", null);
-        if (s!=null) {
-            String[] ss = s.split(" ");
-            allinstances.clear();
-            for (String x: ss) allinstances.add(x);
-        }
-        instanceDomain = pref.getString("mouseapp_inst0", null);
-        if (instanceDomain==null) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // show the window where the user must enter his credentials
-                    UserInput.show(main, new NextAction() {
-                        public void run(String res) {
-                            String[] ss = res.split(" ");
-                            if (ss.length>2) {
-                                useremail=ss[0];
-                                userpwd=ss[1];
-                                instanceDomain=ss[2];
-                                if (useremail.length()==0 || userpwd.length()==0 || instanceDomain.length()==0)
-                                    message("All 3 fields are mandatory");
-                                else {
-                                    SharedPreferences.Editor edit = pref.edit();
-                                    edit.putString("mouseapp_inst0", instanceDomain);
-                                    MouseApp.main.allinstances.add(instanceDomain);
-                                    String s = "";
-                                    for (String iss: MouseApp.main.allinstances) s+=iss+" ";
-                                    s=s.trim();
-                                    edit.putString("mouseapp_insts", s);
-                                    edit.putString(String.format("user_for_%s", instanceDomain), useremail);
-                                    edit.putString(String.format("pswd_for_%s", instanceDomain), userpwd);
-                                    edit.commit();
-                                    serverStage1();
-                                }
-                            }
-                        }
-                    });
-                }
-            });
-        } else {
-            if (s==null) {
-                // bugfix: to remove
-                SharedPreferences.Editor edit = pref.edit();
-                edit.putString("mouseapp_insts", instanceDomain);
-                edit.commit();
-                allinstances.add(instanceDomain);
-            }
-            serverStage1();
-        }
-    }
     public void serverStage1() {
+        if (instanceDomain==null) return; // must never happen !!
         setTitle("MouseApp "+instanceDomain);
         // check if the app is registered
         connect.setInstance(instanceDomain);
@@ -454,18 +440,12 @@ public class MouseApp extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.otherCreds:
-            addAccount();
-			return true;
 		case R.id.delinst:
             delInstance();
 			return true;
 		case R.id.nolang:
             detectlang=!detectlang;
             if (detectlang) filterlang(); else filterlangs=null;
-			return true;
-		case R.id.reset:
-			serverStage0();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -494,7 +474,6 @@ public class MouseApp extends Activity {
             edit.remove(String.format("client_id_for_%s", instanceDomain));
             edit.remove(String.format("client_secret_for_%s", instanceDomain));
             edit.remove(String.format("langs_for_%s", instanceDomain));
-            edit.remove("mouseapp_inst0");
             {
                 String s = "";
                 for (String iss: MouseApp.main.allinstances) s+=iss+" ";
@@ -507,20 +486,40 @@ public class MouseApp extends Activity {
             useremail=null; userpwd=null;
             filterlangs=null;
             instanceDomain="";
-            nextAccount(null);
         }
     }
 
     void addAccount() {
-        if (instanceDomain==null) {
-            message("Must have a first instance");
-            return;
-        }
-        SharedPreferences.Editor edit = pref.edit();
-        edit.remove("mouseapp_inst0");
-        edit.commit();
-        curAccount++;
-        serverStage0();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // show the window where the user must enter his credentials
+                UserInput.show(main, new NextAction() {
+                    public void run(String res) {
+                        String[] ss = res.split(" ");
+                        if (ss.length>2) {
+                            useremail=ss[0];
+                            userpwd=ss[1];
+                            instanceDomain=ss[2];
+                            if (useremail.length()==0 || userpwd.length()==0 || instanceDomain.length()==0)
+                                message("All 3 fields are mandatory");
+                            else {
+                                SharedPreferences.Editor edit = pref.edit();
+                                MouseApp.main.allinstances.add(instanceDomain);
+                                String s = "";
+                                for (String iss: MouseApp.main.allinstances) s+=iss+" ";
+                                s=s.trim();
+                                edit.putString("mouseapp_insts", s);
+                                edit.putString(String.format("user_for_%s", instanceDomain), useremail);
+                                edit.putString(String.format("pswd_for_%s", instanceDomain), userpwd);
+                                edit.commit();
+                                serverStage1();
+                            }
+                        }
+                    }
+                });
+            }
+        });
     }
 
     void filterlang() {
@@ -629,24 +628,9 @@ public class MouseApp extends Activity {
             else message("not connected");
         }
     }
-    public void nextAccount(View v) {
-        jstodownload.clear();
-        if (++curAccount>=allinstances.size()) curAccount=0;
-        SharedPreferences.Editor edit = pref.edit();
-        if (allinstances.size()==0) edit.remove("mouseapp_inst0");
-        else {
-            edit.putString("mouseapp_inst0", allinstances.get(curAccount));
-            message("instance: "+allinstances.get(curAccount));
-        }
-        edit.commit();
-        Spinner spinner = (Spinner)findViewById(R.id.spinner);
-        spinner.setSelection(0,false);
-        serverStage0();
-    }
     public void extramenu(View v) {
         ExtraMenu.show();
     }
-
 
 
     public void closeOnetoot(View v) {
@@ -691,6 +675,7 @@ public class MouseApp extends Activity {
             message("not connected");
             return;
         }
+        if (instanceDomain==null) {message("login first !"); return;}
         tootselected=null;
 		runOnUiThread(new Runnable() {
 			@Override
