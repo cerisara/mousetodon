@@ -28,7 +28,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.util.concurrent.LinkedBlockingQueue;
 import android.content.Context;
-import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView.OnItemSelectedListener;
 
@@ -48,6 +47,7 @@ public class MouseApp extends Activity {
     static String[] waitres = {null};
 
     public TTS tts = null;
+    private boolean delinstance = false;
 
     ArrayList<DetToot> toots = new ArrayList<DetToot>();
     ArrayList<DetToot> savetoots = new ArrayList<DetToot>();
@@ -123,7 +123,7 @@ public class MouseApp extends Activity {
         });
 
         {
-            Spinner spinner = (Spinner)findViewById(R.id.spinner);
+            final NDSpinner spinner = (NDSpinner)findViewById(R.id.spinner);
             String[] items = new String[]{"TL","Notifs", "Home", "Local", "Feder", "Search"};
             ArrayAdapter<String> spinadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
             spinner.setAdapter(spinadapter);
@@ -152,42 +152,7 @@ public class MouseApp extends Activity {
             });
         }
 
-        {
-            String s = pref.getString("mouseapp_insts", null);
-            if (s!=null) {
-                String[] ss = s.split(" ");
-                allinstances.clear();
-                for (String x: ss) allinstances.add(x);
-            }
-            instanceDomain = null;
-
-            Spinner spinner = (Spinner)findViewById(R.id.spinneracc);
-            ArrayList<String> items = new ArrayList<String>();
-            items.add("No instance");
-            for (String x: allinstances) items.add(x);
-            items.add("+ New Account");
-            ArrayAdapter<String> spinadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
-            spinner.setAdapter(spinadapter);
-            spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
-                    jstodownload.clear();
-                    Spinner spin = (Spinner)findViewById(R.id.spinner);
-                    spin.setSelection(0,false);
-                    if (position==allinstances.size()+1) {
-                        addAccount();
-                    } else if (position==0) {
-                        instanceDomain=null;
-                    } else {
-                        instanceDomain = allinstances.get(position-1);
-                        serverStage1();
-                    }
-                }
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
-            });
-        }
-
+        setInstanceSpinner();
 
         File d = getExternalCacheDir();
         File mouseappdir = new File(d, "mouseappdir");
@@ -203,6 +168,51 @@ public class MouseApp extends Activity {
         wvjs.setWebViewClient(connect);
         wvjs.addJavascriptInterface(new MyJavaScriptInterface(), "INTERFACE"); 
 
+    }
+    private void setInstanceSpinner() {
+        String s = pref.getString("mouseapp_insts", null);
+        if (s!=null) {
+            String[] ss = s.split(" ");
+            allinstances.clear();
+            for (String x: ss) allinstances.add(x);
+        }
+        instanceDomain = null;
+
+        final NDSpinner spinner = (NDSpinner)findViewById(R.id.spinneracc);
+        ArrayList<String> items = new ArrayList<String>();
+        items.add("No inst");
+        for (String x: allinstances) {
+            if (x.length()>8) items.add(x.substring(0,8));
+            else items.add(x);
+        }
+        items.add("New Acc");
+        ArrayAdapter<String> spinadapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        spinner.setAdapter(spinadapter);
+        spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+                jstodownload.clear();
+                NDSpinner spin = (NDSpinner)findViewById(R.id.spinner);
+                spin.setSelection(0,false);
+                if (position==allinstances.size()+1) {
+                    if (!delinstance) addAccount();
+                    else instanceDomain=null;
+                } else if (position==0) {
+                    instanceDomain=null;
+                } else {
+                    instanceDomain = allinstances.get(position-1);
+                    if (!delinstance) serverStage1();
+                    else {
+                        delInstance2();
+                        delinstance=false;
+                        spinner.setSelection(0,false);
+                    }
+                }
+                delinstance=false;
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     public void serverStage1() {
@@ -453,6 +463,10 @@ public class MouseApp extends Activity {
 	}
 
     void delInstance() {
+        delinstance=true;
+        message("select an instance in the drop-down list");
+    }
+    void delInstance2() {
         if (instanceDomain==null) {
             message("ERROR: no instance ?");
             return;
@@ -485,7 +499,8 @@ public class MouseApp extends Activity {
             clientId=null; clientSecret=null;
             useremail=null; userpwd=null;
             filterlangs=null;
-            instanceDomain="";
+            instanceDomain=null;
+            setInstanceSpinner();
         }
     }
 
