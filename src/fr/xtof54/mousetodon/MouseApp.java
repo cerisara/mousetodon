@@ -195,8 +195,9 @@ public class MouseApp extends Activity {
                 NDSpinner spin = (NDSpinner)findViewById(R.id.spinner);
                 spin.setSelection(0,false);
                 if (position==allinstances.size()+1) {
-                    if (!delinstance) addAccount();
-                    else instanceDomain=null;
+                    if (!delinstance) {
+                        addAccount();
+                    } else instanceDomain=null;
                 } else if (position==0) {
                     instanceDomain=null;
                 } else {
@@ -528,6 +529,7 @@ public class MouseApp extends Activity {
                                 edit.putString(String.format("user_for_%s", instanceDomain), useremail);
                                 edit.putString(String.format("pswd_for_%s", instanceDomain), userpwd);
                                 edit.commit();
+                                setInstanceSpinner();
                                 serverStage1();
                             }
                         }
