@@ -761,6 +761,7 @@ public class MouseApp extends Activity {
             @Override
             public void run() {
                 VisuToot.close();
+                System.out.println("tootsel "+tootselected.autid);
                 VisuUser.show(tootselected);
             }
         });
@@ -823,9 +824,9 @@ public class MouseApp extends Activity {
                             restoots.add(dt);
                         } else if (typ.equals("follow")) {
                             if (!o.isNull("account")) {
-                                JSONObject acc = o.getJSONObject("account");
-                                String aut = acc.getString("username")+": ";
-                                DetToot dt = new DetToot("followed by: "+aut);
+                                DetToot dt = new DetToot("followed by: ");
+                                dt.getExtraInfos(o);
+                                dt.txt+=dt.username;
                                 restoots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);
