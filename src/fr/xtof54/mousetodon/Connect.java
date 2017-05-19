@@ -198,14 +198,22 @@ webView.loadData(data, "text/HTML", "UTF-8");
         Log.d("Connect","sendToot");
         String surl = String.format("https://%s/api/v1/statuses", domain);
         try {
-            String parms = "status="+URLEncoder.encode(s, "UTF-8");
-            if (origintoot!=null && origintoot.id>=0) {
-                System.out.println("replying to toot "+Integer.toString(origintoot.id));
-                // don't use any more the reply link, because it prevents posting the toot on the public timeline.
-                // parms += "&in_reply_to_id="+Integer.toString(origintoot.id);
-                // so rather insert a link to the previous toot if there's enough space
-                String ss = s+"\n"+"Replied to: "+origintoot.tooturl;
-                if (ss.length()<500) parms="status="+URLEncoder.encode(ss, "UTF-8");
+            String parms;
+            if (s.startsWith("_d_i")) {
+                parms = "status="+URLEncoder.encode(s.substring(4), "UTF-8");
+                if (origintoot!=null && origintoot.id>=0) {
+                    System.out.println("replying to toot "+Integer.toString(origintoot.id));
+                    parms += "&in_reply_to_id="+Integer.toString(origintoot.id);
+                }
+            } else {
+                parms = "status="+URLEncoder.encode(s, "UTF-8");
+                if (origintoot!=null && origintoot.id>=0) {
+                    System.out.println("replying to toot "+Integer.toString(origintoot.id));
+                    // don't use any more the reply link, because it prevents posting the toot on the public timeline.
+                    // so rather insert a link to the previous toot if there's enough space
+                    String ss = s+"\n"+"Replied to: "+origintoot.tooturl;
+                    if (ss.length()<500) parms="status="+URLEncoder.encode(ss, "UTF-8");
+                }
             }
             final String js = "var xhr = new XMLHttpRequest(); "+
                 "xhr.open('POST', '"+surl+"', true); "+

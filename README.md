@@ -158,6 +158,7 @@ a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and 
 - drop-down menu for timelines and instances
 - search for tags
 - Reading aloud (TTS) English-only toots
+- Option to reply either with or without being published on the public timeline
 
 -------------
 

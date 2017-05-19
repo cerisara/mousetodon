@@ -672,15 +672,24 @@ public class MouseApp extends Activity {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-                UserWritings.show(main, new NextAction() {
+                UserWritings.show(main, true, new NextAction() {
                     public void run(String res) {
                         if (res.length()>0) {
-                            startWaitingWindow("Sending toot...");
-                            connect.replyToot(res, tootselected, new NextAction() {
-                                public void run(String res) {
-                                    stopWaitingWindow();
-                                }
-                            });
+                            if (res.length()>4&&res.startsWith("_d_i")) {
+                                startWaitingWindow("Sending toot discretely...");
+                                connect.replyToot(res, tootselected, new NextAction() {
+                                    public void run(String res) {
+                                        stopWaitingWindow();
+                                    }
+                                });
+                            } else {
+                                startWaitingWindow("Sending toot publicly...");
+                                connect.replyToot(res, tootselected, new NextAction() {
+                                    public void run(String res) {
+                                        stopWaitingWindow();
+                                    }
+                                });
+                            }
                         }
                     }
                 });
@@ -697,7 +706,7 @@ public class MouseApp extends Activity {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-                UserWritings.show(main, new NextAction() {
+                UserWritings.show(main, false, new NextAction() {
                     public void run(String res) {
                         if (res.length()>0) {
                             startWaitingWindow("Sending toot...");

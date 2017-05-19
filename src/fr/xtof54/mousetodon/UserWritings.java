@@ -43,7 +43,7 @@ public class UserWritings {
         dialog.show();
     }
 
-    public static void show(Activity main, final NextAction next) {
+    public static void show(Activity main, final boolean but3, final NextAction next) {
 	    LangInput.next=next;
 
         LayoutInflater inflater = LayoutInflater.from(main);
@@ -67,7 +67,7 @@ public class UserWritings {
         dialog = new AlertDialog.Builder(main).create();
         dialog.setTitle("Please write your toot");
         dialog.setView(dialogview);
-        dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE,"Public send",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -82,6 +82,16 @@ public class UserWritings {
                         next.run("");
                     }
                 });
+        if (but3) {
+            dialog.setButton(AlertDialog.BUTTON_NEUTRAL,"Discrete send",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            String u = txt.getText().toString(); 
+                            next.run("_d_i"+u);
+                        }
+                    });
+        }
         dialog.show();
     }
 }
