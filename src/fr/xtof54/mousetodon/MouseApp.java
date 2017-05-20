@@ -182,7 +182,7 @@ public class MouseApp extends Activity {
         ArrayList<String> items = new ArrayList<String>();
         items.add("No inst");
         for (String x: allinstances) {
-            if (x.length()>8) items.add(x.substring(0,8));
+            if (x.length()>10) items.add(x.substring(0,10));
             else items.add(x);
         }
         items.add("New Acc");

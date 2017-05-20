@@ -53,6 +53,7 @@ public class ExtraMenu {
         dialog.show();
 
         ArrayList<String> actions = new ArrayList<String>();
+        actions.add("toot");
         actions.add("clear cache");
         if (MouseApp.main.tts==null) actions.add("start TTS");
         else actions.add("stop TTS");
@@ -67,8 +68,9 @@ public class ExtraMenu {
                 public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
                     ExtraMenu.close();
                     switch (pos) {
-                        case 0: clearCache(); break;
-                        case 1: TTS.startorstop(); break;
+                        case 0: MouseApp.main.writeToot(null); break;
+                        case 1: clearCache(); break;
+                        case 2: TTS.startorstop(); break;
                     }
                 }
             });

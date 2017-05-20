@@ -5,63 +5,60 @@
     android:layout_height="fill_parent"
     >
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    >
-    <fr.xtof54.mousetodon.NDSpinner
-         android:id="@+id/spinner"
-         style="?android:attr/buttonStyleSmall"
-         android:padding="0dip"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" />
-    <fr.xtof54.mousetodon.NDSpinner
-         android:id="@+id/spinneracc"
-         style="?android:attr/buttonStyleSmall"
-         android:padding="0dip"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" />
-
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Toot"
-        android:onClick="writeToot"
-        />
-    <Button
-        android:layout_width="wrap_content"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_height="wrap_content"
-        android:text="..."
-        android:onClick="extramenu"
-        />
-
-</LinearLayout>
-
-<ListView
-        android:id="@+id/list"
-        android:layout_width="match_parent" 
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
-</ListView>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="1pt"
-    >
-    <WebView
-            android:id="@+id/webjs"
-            android:layout_width="10pt"
-            android:layout_height="wrap_content"
-            android:isScrollContainer="false" />
-    <fr.xtof54.mousetodon.DetWebView
-            android:id="@+id/webimg"
+        >
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:isScrollContainer="false" />
-</LinearLayout>
+            android:text="***"
+            android:onClick="extramenu"
+            />
+        <fr.xtof54.mousetodon.NDSpinner
+             android:id="@+id/spinneracc"
+             style="?android:attr/buttonStyleSmall"
+             android:padding="0dip"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content" />
+        <fr.xtof54.mousetodon.NDSpinner
+             android:id="@+id/spinner"
+             style="?android:attr/buttonStyleSmall"
+             android:padding="0dip"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+        <ListView
+                android:id="@+id/list"
+                android:layout_width="match_parent" 
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+        </ListView>
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="1pt"
+        >
+        <WebView
+                android:id="@+id/webjs"
+                android:layout_width="10pt"
+                android:layout_height="wrap_content"
+                android:isScrollContainer="false" />
+        <fr.xtof54.mousetodon.DetWebView
+                android:id="@+id/webimg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:isScrollContainer="false" />
+    </LinearLayout>
 
 </LinearLayout>
 
