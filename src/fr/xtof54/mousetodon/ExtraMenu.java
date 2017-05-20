@@ -57,6 +57,8 @@ public class ExtraMenu {
         actions.add("clear cache");
         if (MouseApp.main.tts==null) actions.add("start TTS");
         else actions.add("stop TTS");
+        actions.add("switch language detection");
+        actions.add("remove instance");
 
         ArrayAdapter adapt = new ArrayAdapter(MouseApp.main, R.layout.rowmenu, actions);
         if (adapt==null) MouseApp.main.message("ERROR extra actions");
@@ -71,6 +73,11 @@ public class ExtraMenu {
                         case 0: MouseApp.main.writeToot(null); break;
                         case 1: clearCache(); break;
                         case 2: TTS.startorstop(); break;
+                        case 3: 
+                            MouseApp.main.detectlang=!MouseApp.main.detectlang;
+                            if (MouseApp.main.detectlang) MouseApp.main.filterlang(); else MouseApp.main.filterlangs=null;
+                            break;
+                        case 4: MouseApp.main.delInstance();
                     }
                 }
             });
