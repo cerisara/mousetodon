@@ -80,8 +80,8 @@ public class ExtraMenu {
                             if (MouseApp.main.detectlang) MouseApp.main.filterlang(); else MouseApp.main.filterlangs=null;
                             break;
                         case 4: MouseApp.main.delInstance(); break;
-			case 5: MoureApp.main.openToot(); break;
-			case 6: MoureApp.main.openUser(); break;
+			case 5: MouseApp.main.openToot(); break;
+			case 6: MouseApp.main.openUser(); break;
                     }
                 }
             });

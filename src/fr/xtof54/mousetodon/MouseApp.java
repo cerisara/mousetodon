@@ -738,10 +738,10 @@ public class MouseApp extends Activity {
 				}
 			    });
 			} catch (Exception e) {
-				e.printStackTrace();
+			    e.printStackTrace();
 			}
-		    });
-		}
+		    }
+		});
             }
         });
     }
