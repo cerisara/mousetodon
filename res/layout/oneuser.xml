@@ -20,6 +20,24 @@
             android:textOff="  Follow"
             android:onClick="follow"
             />
+       <ToggleButton
+            android:layout_width="wrap_content"
+            android:id="@+id/blockbut"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_height="wrap_content"
+            android:textOn="UnBlock"
+            android:textOff="  Block"
+            android:onClick="block"
+            />
+       <ToggleButton
+            android:layout_width="wrap_content"
+            android:id="@+id/mutebut"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_height="wrap_content"
+            android:textOn="UnMute"
+            android:textOff="  Mute"
+            android:onClick="mute"
+            />
 
     </LinearLayout>
 

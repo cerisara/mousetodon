@@ -606,7 +606,7 @@ public class MouseApp extends Activity {
         checkInstance();
         jstodownload.clear();
         lastTL=4;
-        UserWritings.show4tags(MouseApp.main, new NextAction() {
+        UserWritings.show4tags(MouseApp.main, "Search tag ?", new NextAction() {
             public void run(String s) {
                 try {
                     tags = URLEncoder.encode(s, "UTF-8");
@@ -721,6 +721,34 @@ public class MouseApp extends Activity {
             }
         });
     }
+    public void openToot() {
+	UserWritings.show4tags(MouseApp.main, "Toot ID ?", new NextAction() {
+            public void run(String tootid) {
+		connect.getTL("statuses/"+tootid,new NextAction() {
+		    public void run(String res) {
+			try {
+				JSONObject o = new JSONObject(res);
+				DetToot dt = new DetToot(o,detectlang);
+			    tootselected=dt;
+			    runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+				    if (tts!=null) tts.silence();
+				    VisuToot.show(tootselected);
+				}
+			    });
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		    });
+		}
+            }
+        });
+    }
+    public void openUser() {
+	message("not implemented yet");
+    }
+
     public void share(View v) {
         if (tootselected!=null && tootselected.tooturl!=null) {
             android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -749,6 +777,45 @@ public class MouseApp extends Activity {
             message("Cannot reblog: no toot id");
         }
     }
+    public void mute(final View v) {
+        final NextAction dumbaction = new NextAction() {
+            public void run(String res) {}
+        };
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ToggleButton tb = (ToggleButton)v;
+                if (tb.isChecked()) {
+                    connect.muteUser(VisuUser.curuserid, dumbaction);
+                    message("muting user "+VisuUser.curuserid);
+                } else {
+                    connect.unmuteUser(VisuUser.curuserid, dumbaction);
+                    message("unmuting user "+VisuUser.curuserid);
+                }
+            }
+        });
+    }
+
+
+    public void block(final View v) {
+        final NextAction dumbaction = new NextAction() {
+            public void run(String res) {}
+        };
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ToggleButton tb = (ToggleButton)v;
+                if (tb.isChecked()) {
+                    connect.blockUser(VisuUser.curuserid, dumbaction);
+                    message("blocking user "+VisuUser.curuserid);
+                } else {
+                    connect.unblockUser(VisuUser.curuserid, dumbaction);
+                    message("unblocking user "+VisuUser.curuserid);
+                }
+            }
+        });
+    }
+
     public void follow(final View v) {
         final NextAction dumbaction = new NextAction() {
             public void run(String res) {}
@@ -778,23 +845,6 @@ public class MouseApp extends Activity {
         });
     }
     private NextAction torun = null;
-
-    void getStatus(final int id) {
-        connect.getTL("statuses/"+Integer.toString(id),new NextAction() {
-            public void run(String res) {
-                try {
-                    if (torun!=null) {
-                        torun.run(res);
-                        torun=null;
-                    } else {
-                        JSONObject json = new JSONObject(res);
-                        // TODO
-                    }
-                } catch (Exception e) {
-                }
-            }
-        });
-    }
 
     void getNotifs(final String tl) {
         startWaitingWindow("Getting notifs...");

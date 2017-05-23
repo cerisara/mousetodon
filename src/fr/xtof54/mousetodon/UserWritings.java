@@ -15,7 +15,7 @@ public class UserWritings {
 	static AlertDialog dialog;
 	static NextAction next;
 
-    public static void show4tags(Activity main, final NextAction next) {
+    public static void show4tags(Activity main, String title, final NextAction next) {
 	    LangInput.next=next;
 
         LayoutInflater inflater = LayoutInflater.from(main);
@@ -23,7 +23,7 @@ public class UserWritings {
         final TextView txt = (TextView)dialogview.findViewById(R.id.toots);
 
         dialog = new AlertDialog.Builder(main).create();
-        dialog.setTitle("Search tag ?");
+        dialog.setTitle(title);
         dialog.setView(dialogview);
         dialog.setButton(AlertDialog.BUTTON_POSITIVE,"OK",
                 new DialogInterface.OnClickListener() {

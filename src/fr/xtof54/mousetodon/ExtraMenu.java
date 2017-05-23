@@ -59,6 +59,8 @@ public class ExtraMenu {
         else actions.add("stop TTS");
         actions.add("switch language detection");
         actions.add("remove instance");
+        actions.add("open toot");
+        actions.add("open user");
 
         ArrayAdapter adapt = new ArrayAdapter(MouseApp.main, R.layout.rowmenu, actions);
         if (adapt==null) MouseApp.main.message("ERROR extra actions");
@@ -77,7 +79,9 @@ public class ExtraMenu {
                             MouseApp.main.detectlang=!MouseApp.main.detectlang;
                             if (MouseApp.main.detectlang) MouseApp.main.filterlang(); else MouseApp.main.filterlangs=null;
                             break;
-                        case 4: MouseApp.main.delInstance();
+                        case 4: MouseApp.main.delInstance(); break;
+			case 5: MoureApp.main.openToot(); break;
+			case 6: MoureApp.main.openUser(); break;
                     }
                 }
             });
