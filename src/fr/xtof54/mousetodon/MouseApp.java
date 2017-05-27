@@ -758,7 +758,7 @@ public class MouseApp extends Activity {
             // clipboard.setPrimaryClip(clip);
             message("Toot URL is now in clipboard !");
         } else {
-            message("Cannot reblog: no toot id");
+            message("Cannot share: no toot id");
         }
     }
     public void quit(View v) {
@@ -905,10 +905,9 @@ public class MouseApp extends Activity {
                             }
                         } else if (typ.equals("reblog")) {
                             if (!o.isNull("account")) {
-                                JSONObject acc = o.getJSONObject("account");
-                                String aut = acc.getString("username")+": ";
-                                DetToot dt = new DetToot("reblog by: "+aut);
-                                dt.txt+=dt.getText(o.getJSONObject("status"),false);
+                                DetToot dt = new DetToot("reblog by: ");
+                                dt.getExtraInfos(o);
+                                dt.txt+=dt.username+"\n"+dt.getText(o.getJSONObject("status"),false);
                                 restoots.add(dt);
                             } else {
                                 DetToot dt = new DetToot("unhandled type: "+typ);
