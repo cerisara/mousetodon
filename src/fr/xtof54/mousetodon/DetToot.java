@@ -41,6 +41,14 @@ public class DetToot {
         }
     }
 
+    public static DetToot getToot(String json, boolean detectlang) {
+        try {
+            JSONObject o = new JSONObject(json);
+            DetToot toot = new DetToot(o,detectlang);
+            return toot;
+        } catch (Exception e) {return null;}
+    }
+
     public DetToot(JSONObject json, boolean detectlang) {
         // MUST get extra info before text because of media list
         getExtraInfos(json);

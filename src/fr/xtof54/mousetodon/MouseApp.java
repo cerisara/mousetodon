@@ -34,7 +34,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 public class MouseApp extends Activity {
     public static MouseApp main=null;
     public static String access_token=null;
-    public static String tmpfiledir=null;
     public boolean detectlang = false, resetTL = true;
 
     public boolean appRegistered=false;
@@ -154,11 +153,6 @@ public class MouseApp extends Activity {
 
         setInstanceSpinner();
 
-        File d = getExternalCacheDir();
-        File mouseappdir = new File(d, "mouseappdir");
-        mouseappdir.mkdirs();
-        tmpfiledir=mouseappdir.getAbsolutePath();
-        Log.d("CACHEDIR",tmpfiledir);
         imgsinrow.clear();
 
         connect = new Connect();
