@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import java.util.ArrayList;
 import android.graphics.Bitmap;
 import android.content.Intent;
+import android.text.Html;
 
 public class VisuToot {
 	private static AlertDialog dialog=null;
@@ -37,8 +38,12 @@ public class VisuToot {
             Bitmap bMap = toot.getUserIcon();
             imageView.setImageBitmap(bMap);
         }
+        TextView txtv = (TextView) dialogview.findViewById(R.id.texttoot);
+        String ttxt = toot.getStr();
+        if (ttxt!=null) txtv.setText(Html.fromHtml(ttxt));
+
         dialog = new AlertDialog.Builder(main).create();
-        dialog.setTitle("Toot medias & details");
+        dialog.setTitle("Toot ID: "+Integer.toString(toot.id));
         dialog.setView(dialogview);
         dialog.show();
 

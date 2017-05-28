@@ -2,7 +2,8 @@
 Functionalities to implement next:
 
 - (DONE) block/mute user
-- user may directly enter a user or toot ref in a textfield
+- (DONE) user may directly enter a toot ID in a textfield
+- user may directly enter a user ref in a textfield
 - offline toot writing, send later
 - upload media
 - share button to be able to toot a photo/text from outside the app
@@ -10,6 +11,7 @@ Functionalities to implement next:
 - auto show medias when pressing "infos"
 - automatically recognize links to other toots and show them as "relatives"
 - content warning
+- compile summary of a period into an ebook
 
 Enhancements to implement next:
 

@@ -160,6 +160,13 @@ a Android/Mastodon SSL handshake incompatibility for all native apps (Tusky and 
 - Reading aloud (TTS) English-only toots
 - Option to reply either with or without being published on the public timeline
 
+### v0.11
+
+- slightly improve GUI 
+- bugfix: open user info from notifications
+- added support for blokc/unblock, mute/unmute
+- user may open toot by ID
+
 -------------
 
 ### Features to be implemented next:
