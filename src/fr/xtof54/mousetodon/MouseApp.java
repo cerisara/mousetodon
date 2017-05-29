@@ -297,6 +297,7 @@ public class MouseApp extends Activity {
     }
 
     public void stopAll() {
+        TootsPool.stopdownload=true;
         DetIcons.stopAll();
         TootsManager.stopAll();
         tootsmgr=null;
@@ -1053,6 +1054,8 @@ public class MouseApp extends Activity {
 
     // empile les commandes javascript a executer + cree un thread qui les execute et attend qu'elles aient fini
     public static void javascriptCmd(final String url, final NextAction jsnext) {
+        // sert a prevenir TootsPool que des download sont en cours, et qu'il doit attendre 5s sans action SI ce n'est pas le sien !
+        TootsPool.userDownloadAction(url);
         try {
             if (jsdownloader==null) {
                 jsdownloader = new Thread(new Runnable() {

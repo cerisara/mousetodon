@@ -107,34 +107,58 @@ public class TootsPool {
     // while the user is reading toots, it's good to call this method in the background to download the previous ones
     // WARNING: must be called with the same current instance in MouseApp: cannot download from another instance !
     // TODO: stop downloading from MouseApp when changing instance
-    public void downloadFrom(String inst, int highestid) {
-        stopdownload=false;
-        TreeSet<DetToot> sortedset = inst2pool.get(inst);
-        if (sortedset==null) {
-            sortedset = new TreeSet<DetToot>();
-            inst2pool.put(inst,sortedset);
-        }
-        TreeSet<Integer> knownids = alreadyDownloaded.get(inst);
-        if (knownids==null) {
-            knownids = new TreeSet<Integer>();
-            alreadyDownloaded.put(inst,knownids);
-        }
-        for (int id=highestid-1;id>0;id--) {
-            if (stopdownload) break;
-            if (!knownids.contains(id)) {
-                DetToot tt = downloadOne(id);
-                knownids.add(id);
-                if (tt!=null) sortedset.add(tt);
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+    private static Thread downloadt = null;
+    public void downloadFrom(final String inst, final int highestid) {
+        // a chaque fois qu'on l'appelle, on verifie d'abord que l'ancien est arrete
+        while (downloadt!=null) {
+            stopdownload=true;
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+        downloadt = new Thread(new Runnable() {
+            public void run() {
+                stopdownload=false;
+                TreeSet<DetToot> sortedset = inst2pool.get(inst);
+                if (sortedset==null) {
+                    sortedset = new TreeSet<DetToot>();
+                    inst2pool.put(inst,sortedset);
+                }
+                TreeSet<Integer> knownids = alreadyDownloaded.get(inst);
+                if (knownids==null) {
+                    knownids = new TreeSet<Integer>();
+                    alreadyDownloaded.put(inst,knownids);
+                }
+                for (int id=highestid-1;id>0;id--) {
+                    if (stopdownload) break;
+                    long curt = System.currentTimeMillis();
+                    if (curt-lastUserActionTime<5000) {
+                        id++; continue;
+                        // ne download rien si le user est en train de manpulr
+                    }
+                    if (!knownids.contains(id)) {
+                        DetToot tt = downloadOne(id);
+                        knownids.add(id);
+                        if (tt!=null) sortedset.add(tt);
+                        try {
+                            Thread.sleep(1000);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                downloadt=null;
+            }
+        });
+        downloadt.start();
     }
+    private static String curdownloadurl = "FREFVSVFGFSGR4HYOOOR";
+    private static long lastUserActionTime = 0;
     private DetToot downloadOne(final int tootid) {
         final ArrayBlockingQueue<DetToot> tres = new ArrayBlockingQueue<DetToot>(1);
+        curdownloadurl = "statuses/"+tootid;
         MouseApp.main.connect.getTL("statuses/"+tootid,new NextAction() {
             public void run(String res) {
                 try {
@@ -157,6 +181,14 @@ public class TootsPool {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static void userDownloadAction(String url) {
+        if (url.indexOf(curdownloadurl)>=0) {
+            // c'est bon, c'est notre download
+            return;
+        }
+        lastUserActionTime = System.currentTimeMillis();
     }
 }
 
