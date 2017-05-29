@@ -53,7 +53,7 @@ public class ExtraMenu {
         dialog.show();
 
         ArrayList<String> actions = new ArrayList<String>();
-        actions.add("toot");
+        actions.add("write toot");
         actions.add("clear cache");
         if (MouseApp.main.tts==null) actions.add("start TTS");
         else actions.add("stop TTS");
@@ -80,8 +80,8 @@ public class ExtraMenu {
                             if (MouseApp.main.detectlang) MouseApp.main.filterlang(); else MouseApp.main.filterlangs=null;
                             break;
                         case 4: MouseApp.main.delInstance(); break;
-			case 5: MouseApp.main.openToot(); break;
-			case 6: MouseApp.main.openUser(); break;
+                        case 5: MouseApp.main.openToot(); break;
+                        case 6: MouseApp.main.openUser(); break;
                     }
                 }
             });

@@ -716,26 +716,26 @@ public class MouseApp extends Activity {
         });
     }
     public void openToot() {
-	UserWritings.show4tags(MouseApp.main, "Toot ID ?", new NextAction() {
+        UserWritings.show4tags(MouseApp.main, "Toot ID ?", new NextAction() {
             public void run(String tootid) {
-		connect.getTL("statuses/"+tootid,new NextAction() {
-		    public void run(String res) {
-			try {
-				JSONObject o = new JSONObject(res);
-				DetToot dt = new DetToot(o,detectlang);
-			    tootselected=dt;
-			    runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-				    if (tts!=null) tts.silence();
-				    VisuToot.show(tootselected);
-				}
-			    });
-			} catch (Exception e) {
-			    e.printStackTrace();
-			}
-		    }
-		});
+                connect.getTL("statuses/"+tootid,new NextAction() {
+                    public void run(String res) {
+                        try {
+                            JSONObject o = new JSONObject(res);
+                            DetToot dt = new DetToot(instanceDomain,o,detectlang);
+                            tootselected=dt;
+                            runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (tts!=null) tts.silence();
+                                VisuToot.show(tootselected);
+                            }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         });
     }
@@ -922,7 +922,7 @@ public class MouseApp extends Activity {
                             public void run(String res) {
                                 try {
                                     JSONObject o = new JSONObject(res);
-                                    restoots.set(ii,new DetToot(o,detectlang));
+                                    restoots.set(ii,new DetToot(instanceDomain,o,detectlang));
                                     action2.gotNewToots(restoots);
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -987,7 +987,7 @@ public class MouseApp extends Activity {
                     System.out.println("GOTTOOTS "+Integer.toString(json.length()));
                     for (int i=0;i<json.length();i++) {
                         JSONObject o = (JSONObject)json.get(i);
-                        DetToot dt = new DetToot(o,detectlang);
+                        DetToot dt = new DetToot(instanceDomain,o,detectlang);
                         if (dt.lang==null || filterlangs==null) restoots.add(dt);
                         else {
                             for (String s: filterlangs) {
@@ -1031,7 +1031,7 @@ public class MouseApp extends Activity {
             public void run(String res) {
                 try {
                     JSONObject o = new JSONObject(res);
-                    DetToot dt = new DetToot(o,false);
+                    DetToot dt = new DetToot(instanceDomain,o,false);
                     VisuHistory.addToot(dt);
                     int toot2download = dt.parentid;
                     if (toot2download>=0) recursHist(toot2download, curtoot-1);

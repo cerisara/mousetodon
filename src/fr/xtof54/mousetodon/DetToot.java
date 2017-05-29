@@ -16,8 +16,9 @@ import org.json.JSONArray;
 import android.graphics.Bitmap;
 import java.util.HashMap;
 import java.util.Date;
+import java.lang.Comparable;
 
-public class DetToot {
+public class DetToot implements Comparable<DetToot> {
     static LangDetect langdetect = null;
     static boolean langdetectpossible = true;
     public String txt, lang=null;
@@ -30,8 +31,17 @@ public class DetToot {
     public String date=""; // formatted in ISO 8601
     ArrayList<String> medias = new ArrayList<String>();
     public String tooturl = "";
+    private String instance = null;
 
     private static HashMap<Integer,DetToot> alltoots = new HashMap<Integer,DetToot>();
+
+    @Override
+    public int compareTo(DetToot t) {
+        int a=id;
+        int b=t.id;
+        return a > b ? +1 : a < b ? -1 : 0;
+    }
+
     public static void checkImages() {
         for (DetToot t : alltoots.values()) {
             if (t!=null && t.usericon==null && t.usericonurl!=null) {
@@ -41,15 +51,16 @@ public class DetToot {
         }
     }
 
-    public static DetToot getToot(String json, boolean detectlang) {
+    public static DetToot getToot(String instance, String json, boolean detectlang) {
         try {
             JSONObject o = new JSONObject(json);
-            DetToot toot = new DetToot(o,detectlang);
+            DetToot toot = new DetToot(instance,o,detectlang);
             return toot;
         } catch (Exception e) {return null;}
     }
 
-    public DetToot(JSONObject json, boolean detectlang) {
+    public DetToot(String inst, JSONObject json, boolean detectlang) {
+        instance=inst;
         // MUST get extra info before text because of media list
         getExtraInfos(json);
         String texte = getText(json,true);
