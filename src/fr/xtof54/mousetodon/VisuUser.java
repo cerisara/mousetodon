@@ -94,7 +94,7 @@ public class VisuUser {
                                 tootlist.clear();
                                 for (int i=0;i<json.length();i++) {
                                     JSONObject o = (JSONObject)json.get(i);
-                                    DetToot dt = new DetToot(o,false);
+                                    DetToot dt = new DetToot(MouseApp.main.instanceDomain,o,false);
                                     adapt.add(dt.getStr());
                                     tootlist.add(dt);
                                     System.out.println("USERTLLLLLLLO "+dt.getStr());

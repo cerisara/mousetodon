@@ -38,6 +38,7 @@ LIBS=$(ls libs/*.jar | awk '{a=a":"$1}END{print a}')
 
 mkdir out
 javac -bootclasspath $ANDJAR -source 1.7 -target 1.7 -cp "$ANDJAR""$LIBS" -d out $SRCFILES $GENFILES
+
 JARS=$(ls $PWD/libs/*.jar | awk '{a=a" "$1}END{print a}')
 cd out
 $ANDBIN/dx --dex --output classes.dex $JARS .
