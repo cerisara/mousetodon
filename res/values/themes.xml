@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme" parent="android:Theme">
+        <item name="android:windowTitleSize">20dip</item>
+    </style>
+
+<style name="themedark" parent="android:Theme"> 
+  <item name="android:background">#000000</item> 
+</style> 
+
+</resources>
+
